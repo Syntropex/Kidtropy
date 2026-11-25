@@ -6,6 +6,21 @@ Built for little fingers on phones and iPads. No reading needed: everything is s
 
 ▶️ **Play:** https://kidtropy.syntropex.tech
 
+## Grades: Pre-K, Kindergarten and 1st grade
+
+Pick a grade at the top of the home screen. Each grade has five sections:
+
+| | Section | What's in it |
+|---|---|---|
+| 🎮 | **Play** | The games below. They work for every age. |
+| 🎯 | **Practice** | Endless skill games with stars and stickers. Wrong answers get a hint and another try. |
+| 📚 | **Learn** | Short spoken lessons ("A ten frame has ten spaces…"), then a few practice questions. |
+| 🧰 | **Tools** | Tracing letters and numbers, counting board, number chart, clock, flashcards. |
+| ✅ | **Quiz** | 10 questions per skill, scored with up to 3 stars. Scores appear in the grown-ups progress report. |
+
+**Math:** numbers, counting, shapes, colors, big/small, patterns (Pre-K) · numbers to 20, ten frames, more/fewer, bigger number, adding and taking away within 10, 3D shapes (K) · adding and subtracting within 20, make 10, counting to 120, tens and ones, comparing numbers, telling time, longer/shorter (1st).
+**Reading:** letters (Pre-K) · letter sounds, upper/lowercase, rhymes, sight words, reading short words (K) · sh/ch/th, sight words, word families, reading sentences (1st).
+
 ## The games
 
 | | Game | What they learn |
@@ -61,6 +76,7 @@ src/
   app.ts            home screen, router, sticker book, grown-ups page
   voice/lines.ts    every sentence Kidtropy says (one place, so it can be pre-recorded)
   data/items.ts     the picture catalog: names, aliases, sounds, fun facts
+  learn/            grades, skills, lessons, quizzes and tools (math.ts, reading.ts, tools/)
   art/art.ts        hand-drawn SVGs (excavator, bulldozer, triceratops, …)
   games/*.ts        one file per game
   lib/speech.ts     plays the recorded voice (falls back to device speech) + listening
@@ -73,6 +89,7 @@ src/
 
 - **A new picture:** add an entry to `src/data/items.ts` with an `emoji` (or draw an SVG in `src/art/art.ts`), a few `aliases` kids might say, a `sound`, and a `fact`, then run `npm run voice`. It shows up in every game automatically.
 - **New words for Kidtropy to say:** add them to `src/voice/lines.ts` (and to `allLines()`), then `npm run voice`.
+- **A new skill:** add a `Skill` to `src/learn/math.ts` or `src/learn/reading.ts` with a `make()` that returns a random question and a `lines()` that lists every sentence it can say. It gets a Practice tile and a Quiz automatically.
 - **A new game:** create `src/games/mygame.ts` exporting a `Game`, then add it to `GAMES` in `src/app.ts`. Check `scene.alive()` after every `await` so the game stops cleanly when the kid taps 🏠.
 
 Contributions are welcome! Keep it toddler-proof: big tap targets, everything spoken aloud, no reading required, nothing scary, and no data leaving the device.
