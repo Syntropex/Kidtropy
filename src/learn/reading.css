@@ -1,0 +1,133 @@
+/* ---- Reading skills and lessons (src/learn/reading.ts) ------------------- */
+
+/* Letters and words kids read: a plain, school-style face where one is available. */
+.rd-font,
+.rd-letter,
+.rd-word,
+.rd-sentence,
+.rd-chip,
+.q-big .big-text,
+.q-words .word-text {
+  font-family: "Andika", "Century Gothic", "Avenir Next", var(--font);
+}
+
+.rd-letter {
+  font-size: clamp(84px, min(26vw, 19vh), 170px);
+  font-weight: 900;
+  line-height: 1;
+  color: #1e88e5;
+  padding: 0 0.15em;
+}
+
+.rd-word {
+  font-size: clamp(54px, min(15vw, 11vh), 110px);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #37474f;
+  letter-spacing: 1px;
+  padding: 0 0.2em;
+}
+
+.rd-sentence {
+  font-size: clamp(30px, min(8.5vw, 6vh), 60px);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #37474f;
+  text-align: center;
+}
+
+.rd-mark {
+  color: #e53935;
+  font-weight: inherit;
+}
+
+.rd-pic {
+  width: clamp(96px, min(28vw, 17vh), 160px);
+  height: clamp(96px, min(28vw, 17vh), 160px);
+  display: flex;
+  flex: none;
+}
+
+.rd-pic.small {
+  width: clamp(64px, min(18vw, 11vh), 110px);
+  height: clamp(64px, min(18vw, 11vh), 110px);
+}
+
+.rd-pic .pic {
+  width: 100%;
+  height: 100%;
+}
+
+/* Pictures on lesson slides sit on white cards like .lesson-pic. */
+.rd-pic.lesson {
+  width: min(40vw, 24vh, 220px);
+  height: min(40vw, 24vh, 220px);
+  background: #fff;
+  border-radius: 30px;
+  box-shadow: var(--shadow);
+  padding: 4%;
+}
+
+.rd-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 100%;
+}
+
+.rd-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 3vw, 24px);
+  max-width: 100%;
+}
+
+.lesson-big.rd-small {
+  font-size: min(18vw, 16vh, 130px);
+}
+
+.rd-chip {
+  background: #fff;
+  border-radius: 22px;
+  padding: 6px 18px;
+  font-size: clamp(32px, 9vw, 56px);
+  font-weight: 800;
+  color: #37474f;
+  box-shadow: var(--shadow);
+}
+
+.rd-thumb {
+  width: min(30vw, 18vh, 150px);
+  height: min(30vw, 18vh, 150px);
+  display: flex;
+}
+
+/* Word family slides: picture over its word. */
+.rd-fam {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(10px, 3vw, 28px);
+}
+
+.rd-fam-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 26px;
+  padding: 10px 12px 4px;
+}
+
+.rd-fam-item .rd-pic {
+  width: min(24vw, 17vh, 150px);
+  height: min(24vw, 17vh, 150px);
+}
+
+.rd-fam-item .rd-word {
+  font-size: clamp(36px, min(10vw, 8vh), 72px);
+}
