@@ -1,0 +1,777 @@
+/* ---- Tools (src/learn/tools/) --------------------------------------------- */
+
+.tool {
+  /* Kid-friendly letter shapes (single-story "a") for letters, numbers and words. */
+  --t-font: Futura, "Century Gothic", "Avenir Next", ui-rounded, "Arial Rounded MT Bold", "Nunito", Arial, sans-serif;
+  --t-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+
+.t-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0 8px;
+}
+
+.t-btn {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow);
+  font-size: 40px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--t-emoji);
+}
+
+.t-bar-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.t-chips {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.t-chip,
+.t-tab {
+  flex: none;
+  min-width: 72px;
+  height: 72px;
+  padding: 0 14px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+  border: 4px solid transparent;
+  color: #37474f;
+  font-size: 28px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.t-chip.on,
+.t-tab.on {
+  background: #fff;
+  border-color: #ffb300;
+}
+
+.t-chip .pic {
+  width: 52px;
+  height: 52px;
+  font-size: 44px;
+}
+
+.t-btn:active,
+.t-chip:active,
+.t-tab:active,
+.t-pick:active,
+.t-color:active,
+.t-num:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+
+.t-pulse {
+  animation: t-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes t-pulse {
+  50% {
+    transform: scale(1.14);
+    box-shadow: 0 0 0 8px rgba(255, 214, 0, 0.7), var(--shadow);
+  }
+}
+
+/* Boxes that fill the space left over: their content is positioned so it never
+   makes the page taller (sized from --bw/--bh, set by boxVars()). */
+.t-pick-box,
+.t-frames-box,
+.t-chart-box,
+.t-clock-box,
+.t-fc-box {
+  position: relative;
+  overflow: visible;
+}
+
+.t-frames,
+.t-chart,
+.t-clock-face,
+.t-fc-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+}
+
+.t-pick-grid {
+  position: absolute;
+  inset: 0;
+}
+
+/* ---- Trace it ---------------------------------------------------------------- */
+
+.t-tabs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.t-tab {
+  font-family: var(--t-font);
+  min-width: 80px;
+}
+
+.t-tab .ico,
+.t-tab .ico-emoji {
+  font-size: 40px;
+  font-family: var(--t-emoji);
+}
+
+.t-pick-box {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.t-pick-grid {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 5), var(--cell, 72px));
+  grid-auto-rows: var(--cell, 72px);
+  gap: var(--gap, 12px);
+  justify-content: center;
+  align-content: center;
+}
+
+.t-pick {
+  border-radius: 24%;
+  background: #fff;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.t-pick-ch {
+  font-family: var(--t-font);
+  font-weight: 700;
+  font-size: calc(var(--cell, 72px) * 0.62);
+  line-height: 1;
+}
+
+.t-pick-ch.lower {
+  /* Little letters sit a bit high in their box; nudge them down. */
+  transform: translateY(-0.06em);
+}
+
+.t-pick:nth-child(6n + 1) .t-pick-ch { color: #e53935; }
+.t-pick:nth-child(6n + 2) .t-pick-ch { color: #fb8c00; }
+.t-pick:nth-child(6n + 3) .t-pick-ch { color: #43a047; }
+.t-pick:nth-child(6n + 4) .t-pick-ch { color: #1e88e5; }
+.t-pick:nth-child(6n + 5) .t-pick-ch { color: #8e24aa; }
+.t-pick:nth-child(6n + 6) .t-pick-ch { color: #00897b; }
+
+.t-trace-view {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+.t-board {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.t-paper {
+  flex: 1;
+  position: relative;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.t-paper canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.t-ink {
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.t-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.t-colors {
+  gap: 10px;
+}
+
+.t-color {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--c);
+  border: 5px solid #fff;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s;
+}
+
+.t-color.on {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px var(--c), 0 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+@media (orientation: landscape) {
+  .t-trace-view {
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .t-trace-view .t-bar {
+    justify-content: center;
+    gap: 22px;
+  }
+
+  .t-trace-view .t-bar-row {
+    max-width: 168px;
+  }
+
+  .t-trace-view .t-colors {
+    max-width: 150px;
+  }
+}
+
+/* ---- Counting board ------------------------------------------------------------ */
+
+.t-counters .t-chips {
+  flex-wrap: wrap;
+}
+
+.t-counters .t-chips {
+  gap: 8px;
+}
+
+.t-counters .t-chip {
+  width: 66px;
+  min-width: 0;
+  height: 66px;
+  padding: 0;
+}
+
+.t-frames-box {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.t-frames {
+  --cell: min((var(--bw) - 40px) / 5, (var(--bh) - 60px) / 4, 130px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (orientation: landscape) {
+  .t-frames {
+    --cell: min((var(--bw) - 90px) / 10, (var(--bh) - 30px) / 2, 130px);
+    flex-direction: row;
+    gap: 28px;
+  }
+}
+
+.t-frame {
+  display: grid;
+  grid-template-columns: repeat(5, var(--cell));
+  grid-auto-rows: var(--cell);
+  gap: 4px;
+  padding: 4px;
+  background: #546e7a;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.t-cell {
+  background: #fff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8%;
+}
+
+.t-frame .t-cell:first-child { border-top-left-radius: 14px; }
+.t-frame .t-cell:nth-child(5) { border-top-right-radius: 14px; }
+.t-frame .t-cell:nth-child(6) { border-bottom-left-radius: 14px; }
+.t-frame .t-cell:nth-child(10) { border-bottom-right-radius: 14px; }
+
+.t-counter {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  pointer-events: none;
+}
+
+.t-counter .pic {
+  width: 100%;
+  height: 100%;
+  font-size: calc(var(--cell) * 0.66);
+}
+
+.t-poof {
+  animation: t-poof 0.22s forwards;
+}
+
+@keyframes t-poof {
+  to {
+    transform: scale(0.2) rotate(40deg);
+    opacity: 0;
+  }
+}
+
+.t-count-bar {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: center;
+}
+
+.t-plus {
+  color: #fff;
+  font-family: var(--font);
+  font-size: 64px;
+  font-weight: 900;
+  padding-bottom: 6px;
+  background: #43a047;
+  box-shadow: 0 6px 0 #2e7d32;
+}
+
+.t-count-num {
+  min-width: 2.2em;
+  text-align: center;
+  font-size: 64px;
+  line-height: 72px;
+  font-weight: 900;
+  font-family: var(--t-font);
+  color: #fff;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.22);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Number chart --------------------------------------------------------------- */
+
+.t-numbers .t-chip {
+  font-family: var(--t-font);
+}
+
+.t-play {
+  background: #43a047;
+  box-shadow: 0 6px 0 #2e7d32;
+}
+
+.t-play.on {
+  background: #ef5350;
+  box-shadow: 0 6px 0 #c62828;
+}
+
+.t-chart-box {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.t-chart {
+  --gap: 4px;
+  --h: calc((var(--bh) - (var(--rows) - 1) * var(--gap)) / var(--rows));
+  --w: min((var(--bw) - 9 * var(--gap)) / 10, var(--h) * 1.7);
+  --rh: min(var(--h), var(--w) * 1.4, 90px);
+  display: grid;
+  grid-template-columns: repeat(10, var(--w));
+  grid-auto-rows: var(--rh);
+  gap: var(--gap);
+}
+
+.t-num {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+  font-family: var(--t-font);
+  font-weight: 800;
+  font-size: min(var(--w) * 0.4, var(--rh) * 0.5);
+  color: #37474f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* Tens down the right-hand side. */
+.t-num:nth-child(10n) {
+  color: #1565c0;
+}
+
+.t-num.skip {
+  background: #ffca28;
+  color: #4e342e;
+}
+
+.t-num.lit {
+  background: #66bb6a;
+  color: #fff;
+}
+
+.t-num.flash {
+  animation: t-flash 0.7s;
+}
+
+@keyframes t-flash {
+  0% {
+    background: #ff7043;
+    color: #fff;
+    transform: scale(1.3);
+  }
+}
+
+/* ---- Clock ------------------------------------------------------------------------- */
+
+.t-clock {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 14px;
+}
+
+.t-clock-box {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.t-clock-face {
+  width: min(var(--bw), var(--bh));
+  height: min(var(--bw), var(--bh));
+  touch-action: none;
+  overflow: visible;
+}
+
+.t-clock-face .rim {
+  fill: #42a5f5;
+}
+
+.t-clock-face .dial {
+  fill: #fff;
+}
+
+.t-clock-face .tick {
+  stroke: #b0bec5;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.t-clock-face .tick.big {
+  stroke: #546e7a;
+  stroke-width: 3;
+}
+
+.t-clock-face .num {
+  font-family: var(--t-font);
+  font-size: 21px;
+  font-weight: 900;
+  text-anchor: middle;
+  dominant-baseline: central;
+  stroke: rgba(0, 0, 0, 0.15);
+  stroke-width: 0.6px;
+}
+
+.t-clock-face .hand {
+  transform-origin: 0 0;
+  cursor: grab;
+}
+
+.t-clock-face.turning .hand {
+  transition: transform var(--turn, 200ms) ease-in-out;
+}
+
+.t-clock-face .hand.hour line {
+  stroke: #ef5350;
+}
+
+.t-clock-face .hand.hour circle {
+  fill: #ef5350;
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.t-clock-face .hand.minute line {
+  stroke: #1e88e5;
+}
+
+.t-clock-face .hand.minute circle {
+  fill: #1e88e5;
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.t-clock-face.drag-hour .hand.hour circle,
+.t-clock-face.drag-minute .hand.minute circle {
+  stroke: #ffd600;
+  stroke-width: 5;
+}
+
+.t-clock-face .pin {
+  fill: #37474f;
+}
+
+.t-clock-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.t-digital {
+  min-width: 3.4em;
+  text-align: center;
+  font-family: var(--t-font);
+  font-size: clamp(52px, 11vw, 100px);
+  font-weight: 900;
+  line-height: 1.1;
+  padding: 2px 24px;
+  border-radius: 24px;
+  background: #263238;
+  color: #69f0ae;
+  box-shadow: var(--shadow);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (orientation: landscape) {
+  .t-clock {
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-right: 3vw;
+  }
+
+  .t-clock-side {
+    align-self: center;
+  }
+}
+
+/* ---- Flashcards --------------------------------------------------------------------- */
+
+.t-decks .t-chip {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 110px;
+  padding: 0;
+}
+
+.t-chip-txt {
+  font-family: var(--t-font);
+  font-size: clamp(20px, 5.6vw, 26px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.t-chip-txt b {
+  margin-top: 3px;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: #7e57c2;
+  color: #fff;
+  font-family: var(--font);
+}
+
+.t-chip-shapes {
+  display: flex;
+  gap: 2px;
+}
+
+.t-chip-shapes .t-shape {
+  width: 26px;
+  height: 26px;
+}
+
+.t-shape {
+  display: inline-block;
+}
+
+.t-shape svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.t-fc-box {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.t-fc-card {
+  --cw: min(var(--bw), 780px, var(--bh) * 1.5);
+  --ch: min(var(--bh), 560px);
+  width: var(--cw);
+  height: var(--ch);
+  border-radius: 36px;
+  background: #fff;
+  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.16);
+  border: 6px solid #fff8e1;
+  touch-action: none;
+  overflow: hidden;
+}
+
+.t-fc-card.in-right {
+  animation: t-in-right 0.28s ease-out;
+}
+
+.t-fc-card.in-left {
+  animation: t-in-left 0.28s ease-out;
+}
+
+.t-fc-card.in-pop {
+  animation: pop-in 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@keyframes t-in-right {
+  from {
+    transform: translateX(45%) rotate(4deg);
+    opacity: 0;
+  }
+}
+
+@keyframes t-in-left {
+  from {
+    transform: translateX(-45%) rotate(-4deg);
+    opacity: 0;
+  }
+}
+
+.t-fc-face {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.t-fc-letter {
+  font-family: var(--t-font);
+  font-weight: 700;
+  font-size: min(var(--ch) * 0.6, var(--cw) * 0.46);
+  line-height: 1;
+  color: #e53935;
+  display: flex;
+  align-items: baseline;
+  gap: 0.12em;
+}
+
+.t-fc-letter .lower {
+  color: #1e88e5;
+}
+
+.t-fc-number {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--ch) * 0.04);
+}
+
+.t-fc-number .digit {
+  font-family: var(--t-font);
+  font-weight: 700;
+  font-size: min(var(--ch) * 0.46, var(--cw) * 0.44);
+  line-height: 1;
+  color: #8e24aa;
+}
+
+.t-fc-dots {
+  display: flex;
+  gap: calc(var(--cw) * 0.04);
+}
+
+.t-fc-frame {
+  --d: min(var(--cw) * 0.064, var(--ch) * 0.09);
+  display: grid;
+  grid-template-columns: repeat(5, var(--d));
+  grid-auto-rows: var(--d);
+  gap: calc(var(--d) * 0.25);
+}
+
+.t-fc-frame i {
+  border-radius: 50%;
+  background: #eceff1;
+}
+
+.t-fc-frame i.on {
+  background: #ff7043;
+}
+
+.t-fc-word {
+  font-family: var(--t-font);
+  font-weight: 700;
+  font-size: min(var(--ch) * 0.42, var(--cw) * 1.5 / var(--len));
+  line-height: 1.1;
+  color: #283593;
+}
+
+.t-fc-shape .t-shape {
+  width: min(var(--ch) * 0.72, var(--cw) * 0.72);
+  height: min(var(--ch) * 0.72, var(--cw) * 0.72);
+}
+
+.t-fc-progress {
+  align-self: center;
+  width: min(80%, 480px);
+  height: 10px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+}
+
+.t-fc-progress i {
+  display: block;
+  height: 100%;
+  background: #ffb300;
+  border-radius: 99px;
+  transition: width 0.3s;
+}

@@ -44,7 +44,7 @@ PHONEME_FIXES = [
 def lines():
     """Ask the TypeScript side for every sentence the app can say."""
     bundle = subprocess.run(
-        ["npx", "esbuild", "scripts/voice/dump-lines.ts", "--bundle", "--platform=node", "--format=esm", "--log-level=warning"],
+        ["npx", "esbuild", "scripts/voice/dump-lines.ts", "--bundle", "--platform=node", "--format=esm", "--loader:.css=empty", "--log-level=warning"],
         cwd=ROOT, check=True, capture_output=True, text=True,
     ).stdout
     out = subprocess.run(["node", "--input-type=module"], input=bundle, cwd=ROOT, check=True, capture_output=True, text=True).stdout

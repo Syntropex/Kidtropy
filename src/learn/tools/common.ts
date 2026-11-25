@@ -71,3 +71,18 @@ export function fitGrid(grid: HTMLElement, n: () => number, signal: AbortSignal,
   signal.addEventListener("abort", () => ro.disconnect());
   return fit;
 }
+
+/**
+ * Keeps --bw/--bh (the element's size in px) up to date so CSS can size
+ * things to fit the box (container query units are unreliable in flex layouts).
+ */
+export function boxVars(el: HTMLElement, signal: AbortSignal) {
+  const set = () => {
+    el.style.setProperty("--bw", `${el.clientWidth}px`);
+    el.style.setProperty("--bh", `${el.clientHeight}px`);
+  };
+  const ro = new ResizeObserver(set);
+  ro.observe(el);
+  signal.addEventListener("abort", () => ro.disconnect());
+  set();
+}

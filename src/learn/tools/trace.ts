@@ -45,7 +45,9 @@ const kindOf = (ch: string): Kind => (/\d/.test(ch) ? "digit" : ch === ch.toUppe
 
 /** How much of the glyph must be covered, and how much ink may land off it. */
 const NEED_COVER = 0.6;
-const MAX_OUTSIDE = 0.4;
+const MAX_OUTSIDE = 0.3;
+/** Ink area compared with the glyph's area: way more means scribbling over everything. */
+const MAX_INK = 2.0;
 
 interface Stroke {
   color: string;
@@ -65,10 +67,10 @@ interface Layout {
   stem: number;
 }
 
-const measureCtx = document.createElement("canvas").getContext("2d")!;
+let measureCtx: CanvasRenderingContext2D | null = null;
 
 function layoutGlyph(ch: string, w: number, hgt: number): Layout {
-  const ctx = measureCtx;
+  const ctx = (measureCtx ??= document.createElement("canvas").getContext("2d")!);
   ctx.font = `bold 100px ${FONT}`;
   const capA = ctx.measureText("H").actualBoundingBoxAscent / 100;
   const xA = ctx.measureText("x").actualBoundingBoxAscent / 100;
@@ -250,7 +252,7 @@ export const trace: Tool = {
       let warned = false;
       let glyphPixels = 0;
 
-      const crayon = () => (lay ? Math.max(18, lay.stem * 0.8) : Math.max(16, Math.min(w, hgt) * 0.045));
+      const crayon = () => (lay ? Math.max(18, lay.stem * 0.7) : Math.max(18, Math.min(w, hgt) * 0.06));
 
       function drawGlyph(ctx: CanvasRenderingContext2D, L: Layout, scale: number) {
         ctx.font = `bold ${L.size * scale}px ${FONT}`;
@@ -313,7 +315,7 @@ export const trace: Tool = {
         nctx.fillStyle = "#000";
         nctx.strokeStyle = "#000";
         nctx.lineJoin = "round";
-        nctx.lineWidth = lay.stem * 1.1 * k;
+        nctx.lineWidth = lay.stem * 0.9 * k;
         drawGlyph(nctx, lay, k);
         nctx.font = `bold ${lay.size * k}px ${FONT}`;
         nctx.strokeText(ch, lay.x * k, lay.baseline * k);
@@ -406,7 +408,8 @@ export const trace: Tool = {
         }
         const cover = covered / glyphPixels;
         const off = inkAll ? inkOff / inkAll : 0;
-        if (cover >= NEED_COVER && off <= MAX_OUTSIDE) {
+        const messy = off > MAX_OUTSIDE || inkAll / glyphPixels > MAX_INK;
+        if (cover >= NEED_COVER && !messy) {
           done = true;
           paintBackground();
           for (const s of strokes) for (let i = 0; i < s.pts.length; i++) segment(ictx, s, i, 1);
