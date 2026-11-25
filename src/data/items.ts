@@ -52,7 +52,7 @@ export const ITEMS: Item[] = [
   { id: "garbage", name: "garbage truck", art: "garbage", themes: ["trucks", "construction"], aliases: ["trash truck", "garbage", "recycling truck", "dump"], sound: "Crunch crunch!", fact: "Garbage trucks pick up the trash and squish it." },
   { id: "tow", name: "tow truck", art: "tow", themes: ["trucks"], aliases: ["tow", "towing truck", "wrecker"], sound: "Clink clink!", fact: "Tow trucks pull broken cars with a big hook." },
   { id: "monster", name: "monster truck", art: "monster", themes: ["trucks", "racing"], aliases: ["monster", "big wheels"], sound: "Vroom! Crash!", fact: "Monster trucks have giant wheels and jump really high!" },
-  { id: "motorcycle", name: "motorcycle", emoji: "🏍️", themes: ["trucks", "racing"], aliases: ["motorbike", "bike", "dirt bike"], sound: "Vrrrm vrrrm!", fact: "A motorcycle has only two wheels." },
+  { id: "motorcycle", name: "motorcycle", emoji: "🏍️", themes: ["trucks", "racing"], aliases: ["motorbike", "bike", "dirt bike"], sound: "Vroom vroom!", fact: "A motorcycle has only two wheels." },
   { id: "train", name: "train", emoji: "🚂", themes: ["trucks"], aliases: ["choo choo", "choo choo train", "engine"], sound: "Choo choo!", fact: "Trains ride on long metal tracks." },
   { id: "airplane", name: "airplane", article: "an", emoji: "✈️", themes: ["trucks"], aliases: ["plane", "aeroplane", "jet"], sound: "Zoooom!", fact: "Airplanes fly high up in the clouds." },
   { id: "helicopter", name: "helicopter", emoji: "🚁", themes: ["trucks"], aliases: ["chopper", "copter", "helicopper"], sound: "Whup whup whup!", fact: "Helicopters have spinning blades on top." },
@@ -74,9 +74,9 @@ export const ITEMS: Item[] = [
   { id: "tractor", name: "tractor", emoji: "🚜", themes: ["construction", "farm"], aliases: ["tracker", "tractors", "farm tractor"], sound: "Putt putt putt!", fact: "Tractors help farmers in the fields." },
 
   // ---- Dinosaurs -----------------------------------------------------------
-  { id: "trex", name: "T. rex", article: "a", emoji: "🦖", themes: ["dinos"], aliases: ["t rex", "trex", "tyrannosaurus", "tyrannosaurus rex", "dinosaur", "dino", "tea rex", "teerex"], sound: "ROAR!", fact: "T. rex had tiny arms and big sharp teeth." },
+  { id: "trex", name: "T-rex", emoji: "🦖", themes: ["dinos"], aliases: ["t rex", "trex", "tyrannosaurus", "tyrannosaurus rex", "dinosaur", "dino", "tea rex", "teerex"], sound: "ROAR!", fact: "T-rex had tiny arms and big sharp teeth." },
   { id: "longneck", name: "brontosaurus", emoji: "🦕", themes: ["dinos"], aliases: ["long neck", "longneck", "brachiosaurus", "dinosaur", "dino", "diplodocus", "sauropod", "apatosaurus"], sound: "Stomp stomp!", fact: "Long-neck dinosaurs ate leaves from tall trees." },
-  { id: "triceratops", name: "triceratops", art: "triceratops", themes: ["dinos"], aliases: ["tricera", "three horn", "dinosaur", "dino", "try sarah tops"], sound: "Grrr!", fact: "Triceratops had three horns on its face." },
+  { id: "triceratops", name: "triceratops", art: "triceratops", themes: ["dinos"], aliases: ["tricera", "three horn", "dinosaur", "dino", "try sarah tops"], sound: "Snort snort!", fact: "Triceratops had three horns on its face." },
   { id: "stegosaurus", name: "stegosaurus", art: "stegosaurus", themes: ["dinos"], aliases: ["stego", "stegasaurus", "dinosaur", "dino"], sound: "Rawr!", fact: "Stegosaurus had big plates on its back." },
   { id: "pterodactyl", name: "pterodactyl", art: "pterodactyl", themes: ["dinos"], aliases: ["pteranodon", "terodactyl", "flying dinosaur", "dinosaur", "dino", "bird"], sound: "Screech!", fact: "Pterodactyls flew with big leathery wings." },
   { id: "volcano", name: "volcano", emoji: "🌋", themes: ["dinos"], aliases: ["volcanoes", "lava", "mountain"], sound: "Boom!", fact: "Volcanoes have hot lava inside." },
@@ -84,12 +84,12 @@ export const ITEMS: Item[] = [
 
   // ---- Animals -------------------------------------------------------------
   { id: "lion", name: "lion", emoji: "🦁", themes: ["animals"], aliases: ["lions", "lion king"], sound: "Roar!", fact: "Lions are called the kings of the jungle." },
-  { id: "tiger", name: "tiger", emoji: "🐯", themes: ["animals"], aliases: ["tigers"], sound: "Grrrr!", fact: "Tigers have orange fur with black stripes." },
+  { id: "tiger", name: "tiger", emoji: "🐯", themes: ["animals"], aliases: ["tigers"], sound: "Rawr!", fact: "Tigers have orange fur with black stripes." },
   { id: "elephant", name: "elephant", article: "an", emoji: "🐘", themes: ["animals"], aliases: ["elephants", "ellie"], sound: "Toot toot!", fact: "Elephants use their long trunks like a hand." },
   { id: "giraffe", name: "giraffe", emoji: "🦒", themes: ["animals"], aliases: ["giraffes", "draft", "raff"], fact: "Giraffes have super long necks." },
   { id: "zebra", name: "zebra", emoji: "🦓", themes: ["animals"], aliases: ["zebras", "zeebra"], fact: "Zebras have black and white stripes." },
   { id: "monkey", name: "monkey", emoji: "🐵", themes: ["animals"], aliases: ["monkeys", "ape", "chimp"], sound: "Ooh ooh, ah ah!", fact: "Monkeys love to climb trees and eat bananas." },
-  { id: "bear", name: "bear", emoji: "🐻", themes: ["animals"], aliases: ["bears", "teddy bear", "teddy"], sound: "Grrr!", fact: "Bears love to eat honey and fish." },
+  { id: "bear", name: "bear", emoji: "🐻", themes: ["animals"], aliases: ["bears", "teddy bear", "teddy"], sound: "Growl!", fact: "Bears love to eat honey and fish." },
   { id: "panda", name: "panda", emoji: "🐼", themes: ["animals"], aliases: ["panda bear"], fact: "Pandas eat bamboo all day long." },
   { id: "penguin", name: "penguin", emoji: "🐧", themes: ["animals"], aliases: ["penguins", "pingu"], fact: "Penguins can't fly, but they swim really well." },
   { id: "whale", name: "whale", emoji: "🐳", themes: ["animals"], aliases: ["whales", "fish"], sound: "Splash!", fact: "Whales are the biggest animals in the whole world." },
@@ -130,7 +130,30 @@ export const ITEMS: Item[] = [
   { id: "medal", name: "medal", emoji: "🥇", themes: ["racing"], aliases: ["gold medal", "first place", "number one"], fact: "First place wins the gold medal." },
 ];
 
-export const byId = new Map(ITEMS.map((i) => [i.id, i]));
+/**
+ * Pictures that are not part of the main game pool (ABC words, Dino Dig treasure).
+ */
+export const EXTRAS: Item[] = [
+  { id: "fossil", name: "dinosaur fossil", art: "fossil", themes: [], fact: "Fossils are dinosaur bones that turned into rock." },
+  { id: "gem", name: "treasure", article: "some", emoji: "💎", themes: [], fact: "Shiny, sparkly treasure!" },
+  { id: "icecream", name: "ice cream", article: "an", emoji: "🍦", themes: [] },
+  { id: "juice", name: "juice", article: "some", emoji: "🧃", themes: [] },
+  { id: "jellyfish", name: "jellyfish", emoji: "🪼", themes: [] },
+  { id: "kangaroo", name: "kangaroo", emoji: "🦘", themes: [] },
+  { id: "kite", name: "kite", emoji: "🪁", themes: [] },
+  { id: "ladder", name: "ladder", emoji: "🪜", themes: [] },
+  { id: "nest", name: "nest", emoji: "🪺", themes: [] },
+  { id: "nose", name: "nose", emoji: "👃", themes: [] },
+  { id: "queen", name: "queen", emoji: "👸", themes: [] },
+  { id: "umbrella", name: "umbrella", article: "an", emoji: "☂️", themes: [] },
+  { id: "unicorn", name: "unicorn", emoji: "🦄", themes: [] },
+  { id: "van", name: "van", emoji: "🚐", themes: [] },
+  { id: "xray", name: "x-ray", article: "an", emoji: "🩻", themes: [] },
+  { id: "yoyo", name: "yo-yo", emoji: "🪀", themes: [] },
+  { id: "yak", name: "yak", emoji: "🐃", themes: [] },
+];
+
+export const byId = new Map([...ITEMS, ...EXTRAS].map((i) => [i.id, i]));
 
 export function itemsFor(themes: Theme[] | "all"): Item[] {
   if (themes === "all" || themes.length === 0) return ITEMS;

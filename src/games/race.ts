@@ -5,9 +5,10 @@
 import { raceCar } from "../art/art";
 import { sfx } from "../lib/sfx";
 import { speak } from "../lib/speech";
-import { bounce, confetti, h, pickOne, reward, shuffle, wait } from "../lib/ui";
+import { bounce, confetti, h, icon, pickOne, reward, shuffle, wait } from "../lib/ui";
 import { COLORS } from "./colors";
 import type { Game, Scene } from "./types";
+import { GO, line, SAY } from "../voice/lines";
 
 const CAR_COLORS = ["red", "blue", "green", "yellow", "orange", "purple", "pink"].map((n) => COLORS.find((c) => c.name === n)!);
 
@@ -27,7 +28,7 @@ function pickCar(scene: Scene) {
     h(
       "div",
       { class: "race-pick" },
-      h("div", { class: "race-title", "aria-hidden": "true" }, "🏁"),
+      h("div", { class: "race-title", "aria-hidden": "true" }, icon("🏁")),
       h(
         "div",
         { class: "choice-grid", style: "--pc:2;--pr:2;--lc:4;--lr:1" },
@@ -39,7 +40,7 @@ function pickCar(scene: Scene) {
               "aria-label": `${c.name} race car`,
               onclick: async () => {
                 sfx.vroom();
-                void speak(`The ${c.name} race car! Vroom!`);
+                void speak(line.carChosen(c.name));
                 raceDay(scene, c);
               },
             },
@@ -49,7 +50,7 @@ function pickCar(scene: Scene) {
       ),
     ),
   );
-  void speak("Pick your race car!");
+  void speak(SAY.pickCar);
 }
 
 function raceDay(scene: Scene, mine: (typeof COLORS)[number]) {
@@ -113,16 +114,15 @@ function raceDay(scene: Scene, mine: (typeof COLORS)[number]) {
     running = false;
     go.disabled = true;
     const place = finished.indexOf(me) + 1;
-    const words = ["", "first", "second", "third"];
     lanes[racers.indexOf(me)].car.classList.add("winner");
-    status.textContent = place === 1 ? "🏆 1st!" : `🥈 ${place === 2 ? "2nd" : "3rd"}!`;
+    status.replaceChildren(icon(place === 1 ? "🏆" : "🥈"), place === 1 ? " 1st!" : place === 2 ? " 2nd!" : " 3rd!");
     sfx.fanfare();
     confetti(100);
     void reward(go);
-    await speak(place === 1 ? "You won! First place! You get the trophy!" : `You came in ${words[place]} place! Great racing!`);
+    await speak(place === 1 ? SAY.won : line.place(place));
     if (!scene.alive()) return;
-    const again = h("button", { class: "go-btn pop-in", onclick: () => raceDay(scene, mine), "aria-label": "Race again" }, "🏁 Again!");
-    const newCar = h("button", { class: "round-btn pop-in", onclick: () => pickCar(scene), "aria-label": "Pick a different car" }, "🏎️");
+    const again = h("button", { class: "go-btn pop-in", onclick: () => raceDay(scene, mine), "aria-label": "Race again" }, icon("🏁"), " Again!");
+    const newCar = h("button", { class: "round-btn pop-in", onclick: () => pickCar(scene), "aria-label": "Pick a different car" }, icon("🏎️"));
     go.replaceWith(h("div", { class: "again-row" }, again, newCar));
   }
 
@@ -132,13 +132,13 @@ function raceDay(scene: Scene, mine: (typeof COLORS)[number]) {
     await wait(600);
     const [red, yellow, green] = Array.from(lights.children);
     for (const [el, word] of [
-      [red, "Ready"],
-      [yellow, "Set"],
+      [red, SAY.ready],
+      [yellow, SAY.set],
     ] as const) {
       if (!scene.alive()) return;
       el.classList.add("on");
       sfx.beep();
-      await speak(`${word}...`, { rate: 1.1 });
+      await speak(word, { rate: 1.1 });
       await wait(450);
     }
     if (!scene.alive()) return;
@@ -147,7 +147,7 @@ function raceDay(scene: Scene, mine: (typeof COLORS)[number]) {
     go.disabled = false;
     running = true;
     bounce(go);
-    void speak(pickOne(["Go go go!", "Go! Tap tap tap!"]), { rate: 1.2 });
+    void speak(pickOne(GO), { rate: 1.2 });
     raf = requestAnimationFrame(frame);
   })();
 }

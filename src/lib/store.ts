@@ -6,7 +6,7 @@ import type { Theme } from "../data/items";
 
 export interface Settings {
   themes: Theme[]; // empty = everything
-  voiceName: string; // "" = auto-pick
+  voiceName: string; // "" = Kidtropy recorded voice, "device" = device voice (auto), else a device voice name
   rate: number;
   useMic: boolean;
   choices: number; // how many pictures to choose from

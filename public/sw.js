@@ -1,6 +1,6 @@
 // Kidtropy service worker: makes the app work offline after the first visit.
 // Hashed build assets are cached forever; the page itself is network-first.
-const CACHE = "kidtropy-v1";
+const CACHE = "kidtropy-v2";
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/", "/manifest.webmanifest", "/icons/icon.svg"])));

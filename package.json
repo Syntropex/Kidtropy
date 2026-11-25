@@ -10,7 +10,9 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host",
     "test": "vitest run",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "voice": "python3 scripts/voice/generate.py",
+    "sounds": "python3 scripts/sounds/fetch.py"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

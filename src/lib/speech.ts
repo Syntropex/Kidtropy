@@ -1,7 +1,10 @@
 /**
  * Talking and listening, built on the browser's Web Speech API.
  *
- * - speak(): text-to-speech, works on basically every phone/tablet.
+ * - speak(): plays the pre-recorded natural voice clips (public/voice/, made
+ *   with the open-source Kokoro voice, see scripts/voice/) and real sounds
+ *   (public/sounds/). Any sentence without a clip falls back to the device's
+ *   built-in text-to-speech.
  * - listen(): speech recognition. Works in Safari on iPhone/iPad (iOS 14.5+)
  *   and Chrome on Android/desktop. Not in Firefox. Always have a fallback.
  *
@@ -9,13 +12,24 @@
  * to its own servers to turn it into text. Kidtropy itself never records or
  * uploads anything.
  */
+import MANIFEST from "../voice/manifest.json";
+import { clipId, splitLine } from "../voice/lines";
+import { loadBuffer, playBuffer, stopBuffer } from "./audio";
 import { settings } from "./store";
+
+const CLIPS = new Set<string>((MANIFEST as { clips: string[] }).clips);
 
 const synth: SpeechSynthesis | undefined = typeof speechSynthesis !== "undefined" ? speechSynthesis : undefined;
 
 let cachedVoice: SpeechSynthesisVoice | null | undefined;
 
 const PREFERRED = [
+  // Downloadable high-quality iOS/macOS voices first.
+  "Ava (Premium)",
+  "Zoe (Premium)",
+  "Ava (Enhanced)",
+  "Zoe (Enhanced)",
+  "Samantha (Enhanced)",
   "Samantha", // iOS / macOS default US voice
   "Google US English",
   "Microsoft Aria Online (Natural) - English (United States)",
@@ -50,12 +64,41 @@ export function resetVoice() {
 
 synth?.addEventListener?.("voiceschanged", () => resetVoice());
 
-/** Say something. Resolves when finished (or interrupted). */
-export function speak(text: string, opts: { rate?: number; pitch?: number; interrupt?: boolean } = {}): Promise<void> {
-  if (!synth) return Promise.resolve();
-  if (opts.interrupt !== false) {
-    synth.cancel();
+/** True when the grown-up picked the Kidtropy (recorded) voice. */
+export function usingClips() {
+  return !settings.voiceName && CLIPS.size > 0;
+}
+
+let speakId = 0;
+
+/**
+ * Say something. Resolves when finished (or interrupted by the next speak()).
+ * `[[snd:id]]` in the text plays a real recorded sound at that point.
+ */
+export async function speak(text: string, opts: { rate?: number; pitch?: number; interrupt?: boolean } = {}): Promise<void> {
+  if (opts.interrupt !== false) stopSpeaking();
+  const id = ++speakId;
+  const parts = splitLine(text);
+  const clips = usingClips();
+  // Start every download at once so sentences play back to back.
+  const loads = parts.map((p) => {
+    if ("snd" in p) return loadBuffer(`/sounds/${p.snd}.mp3`);
+    const cid = clipId(p.say);
+    return clips && CLIPS.has(cid) ? loadBuffer(`/voice/${cid}.mp3`) : Promise.resolve(null);
+  });
+  for (let i = 0; i < parts.length; i++) {
+    const buf = await loads[i];
+    if (id !== speakId) return;
+    const p = parts[i];
+    if (buf) await playBuffer(buf, "snd" in p ? 0.8 : 1);
+    else if ("say" in p) await deviceSpeak(p.say, opts);
+    if (id !== speakId) return;
   }
+}
+
+/** Speak with the device's own text-to-speech voice. */
+function deviceSpeak(text: string, opts: { rate?: number; pitch?: number }): Promise<void> {
+  if (!synth) return Promise.resolve();
   return new Promise((resolve) => {
     const u = new SpeechSynthesisUtterance(text);
     const v = pickVoice();
@@ -81,6 +124,8 @@ export function speak(text: string, opts: { rate?: number; pitch?: number; inter
 }
 
 export function stopSpeaking() {
+  speakId++;
+  stopBuffer();
   synth?.cancel();
 }
 

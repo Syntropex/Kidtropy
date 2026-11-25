@@ -2,29 +2,12 @@
  * Tiny synthesized sound effects (no audio files to download).
  */
 import { settings } from "./store";
+export { unlockAudio } from "./audio";
 
-let ctx: AudioContext | null = null;
+import { audioContext } from "./audio";
 
 function ac(): AudioContext | null {
-  if (!settings.sfx) return null;
-  if (!ctx) {
-    const C = window.AudioContext || (window as any).webkitAudioContext;
-    if (!C) return null;
-    ctx = new C();
-  }
-  if (ctx.state === "suspended") void ctx.resume();
-  return ctx;
-}
-
-/** Call from a tap so iOS lets us play sounds. */
-export function unlockAudio() {
-  const c = ac();
-  if (!c) return;
-  const b = c.createBuffer(1, 1, 22050);
-  const s = c.createBufferSource();
-  s.buffer = b;
-  s.connect(c.destination);
-  s.start(0);
+  return settings.sfx ? audioContext() : null;
 }
 
 function tone(freq: number, start: number, dur: number, type: OscillatorType = "sine", vol = 0.25, endFreq?: number) {

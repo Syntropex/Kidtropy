@@ -1,16 +1,15 @@
 /**
  * Dino Dig — rub the dirt away with your finger to find what's buried.
  */
-import { byId, withArticle, type Item } from "../data/items";
+import { byId, type Item } from "../data/items";
 import { sfx } from "../lib/sfx";
 import { speak } from "../lib/speech";
-import { bounce, capitalize, h, makeDeck, pic, reward, wait } from "../lib/ui";
+import { bounce, capitalize, h, icon, makeDeck, pic, reward, wait } from "../lib/ui";
 import type { Game } from "./types";
+import { line, SAY } from "../voice/lines";
 
 const PRIZES: Item[] = [
-  ...["trex", "longneck", "triceratops", "stegosaurus", "pterodactyl", "egg", "bone"].map((id) => byId.get(id)!),
-  { id: "fossil", name: "dinosaur fossil", art: "fossil", themes: ["dinos"], fact: "Fossils are dinosaur bones that turned into rock." },
-  { id: "gem", name: "treasure", article: "some", emoji: "💎", themes: [], fact: "Shiny, sparkly treasure!" },
+  ...["trex", "longneck", "triceratops", "stegosaurus", "pterodactyl", "egg", "bone", "fossil", "gem"].map((id) => byId.get(id)!),
 ];
 
 export const dig: Game = {
@@ -29,10 +28,10 @@ export const dig: Game = {
       const prize = next();
       const prizeEl = h("div", { class: "dig-prize" }, pic(prize));
       const canvas = h("canvas", { class: "dig-dirt", "aria-label": "Dirt. Rub it with your finger to dig." });
-      const tool = h("div", { class: "dig-tool", "aria-hidden": "true" }, "⛏️");
+      const tool = h("div", { class: "dig-tool", "aria-hidden": "true" }, icon("⛏️"));
       const pit = h("div", { class: "dig-pit" }, prizeEl, canvas, tool);
       const word = h("div", { class: "big-word", "aria-live": "polite" });
-      const again = h("button", { class: "go-btn hidden", "aria-label": "Dig again" }, "⛏️ Again!");
+      const again = h("button", { class: "go-btn hidden", "aria-label": "Dig again" }, icon("⛏️"), " Again!");
       root.replaceChildren(h("div", { class: "dig-wrap" }, pit, word, again));
 
       const ctx = canvas.getContext("2d")!;
@@ -133,7 +132,7 @@ export const dig: Game = {
         bounce(prizeEl);
         word.textContent = capitalize(prize.name);
         void reward(prizeEl);
-        await speak(`You found ${withArticle(prize)}! ${prize.sound ?? ""} ${prize.fact ?? ""}`);
+        await speak(line.digFound(prize));
         if (!live()) return;
         again.classList.remove("hidden");
         again.classList.add("pop-in");
@@ -158,7 +157,7 @@ export const dig: Game = {
       };
       canvas.addEventListener("pointerup", up);
       canvas.addEventListener("pointercancel", up);
-      prizeEl.onclick = () => found && void speak(`${capitalize(withArticle(prize))}! ${prize.sound ?? ""}`);
+      prizeEl.onclick = () => found && void speak(line.tapItem(prize));
       again.onclick = () => {
         sfx.whoosh();
         play();
@@ -166,7 +165,7 @@ export const dig: Game = {
 
       void (async () => {
         await wait(200);
-        if (live()) await speak(round === 1 ? "Something is buried in the dirt! Rub with your finger to dig it up!" : "Dig, dig, dig! What's down there?");
+        if (live()) await speak(round === 1 ? SAY.digFirst : SAY.digAgain);
       })();
     }
 

@@ -2,7 +2,7 @@
 
 **Free, open-source learning games for preschoolers who love trucks, diggers, dinosaurs, animals, farms and racing.**
 
-Built for little fingers on phones and iPads. No reading needed: everything is spoken out loud. No ads, accounts or tracking.
+Built for little fingers on phones and iPads. No reading needed: everything is spoken out loud in a warm, natural voice. Real animal and vehicle sounds, colorful 3D pictures. No ads, accounts or tracking.
 
 ▶️ **Play:** https://kidtropy.syntropex.tech
 
@@ -44,15 +44,26 @@ npm test         # unit tests (speech matching, catalog)
 npm run build    # static site in dist/
 ```
 
-Plain TypeScript and Vite with no UI framework: the whole app is about 25 KB gzipped.
+Plain TypeScript and Vite with no UI framework: the app code is about 30 KB gzipped. Voice clips, pictures and sounds load as needed and are cached for offline play.
+
+### Voice, pictures and sounds
+
+| | Where | How it's made |
+|---|---|---|
+| 🗣️ Voice | `public/voice/*.mp3` | `npm run voice` records every sentence in `src/voice/lines.ts` with the open-source [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M) voice (needs `python3`, `ffmpeg`, and `pip install kokoro-onnx soundfile`; the model downloads once). Only new sentences are recorded. |
+| 🖼️ Pictures | `public/pics/*.webp` | [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji) 3D (MIT), plus original SVG drawings in `src/art/art.ts`. |
+| 🔊 Sounds | `public/sounds/*.mp3` | `npm run sounds` downloads CC0 recordings from Freesound (list in `scripts/sounds/fetch.py`), keeps the best seconds and evens the volume. |
+
+`npm test` fails if a sentence has no recorded clip, so new phrases don't silently fall back to the robot voice. See [CREDITS.md](CREDITS.md).
 
 ```
 src/
   app.ts            home screen, router, sticker book, grown-ups page
+  voice/lines.ts    every sentence Kidtropy says (one place, so it can be pre-recorded)
   data/items.ts     the picture catalog: names, aliases, sounds, fun facts
   art/art.ts        hand-drawn SVGs (excavator, bulldozer, triceratops, …)
   games/*.ts        one file per game
-  lib/speech.ts     text-to-speech and speech recognition
+  lib/speech.ts     plays the recorded voice (falls back to device speech) + listening
   lib/match.ts      forgiving matching for little voices
   lib/sfx.ts        synthesized sound effects (no audio files)
   lib/ui.ts         helpers, confetti, stars and stickers
@@ -60,7 +71,8 @@ src/
 
 ### Adding things
 
-- **A new picture:** add an entry to `src/data/items.ts` with an `emoji` (or draw an SVG in `src/art/art.ts`), a few `aliases` kids might say, a `sound`, and a `fact`. It shows up in every game automatically.
+- **A new picture:** add an entry to `src/data/items.ts` with an `emoji` (or draw an SVG in `src/art/art.ts`), a few `aliases` kids might say, a `sound`, and a `fact`, then run `npm run voice`. It shows up in every game automatically.
+- **New words for Kidtropy to say:** add them to `src/voice/lines.ts` (and to `allLines()`), then `npm run voice`.
 - **A new game:** create `src/games/mygame.ts` exporting a `Game`, then add it to `GAMES` in `src/app.ts`. Check `scene.alive()` after every `await` so the game stops cleanly when the kid taps 🏠.
 
 Contributions are welcome! Keep it toddler-proof: big tap targets, everything spoken aloud, no reading required, nothing scary, and no data leaving the device.
@@ -74,4 +86,4 @@ The site is fully static and served by **Cloudflare Workers Static Assets** (see
 
 ## License
 
-[MIT](LICENSE) © Syntropex. All artwork in `src/art/` is original and covered by the same license. Emoji are rendered by each device's own emoji font.
+Code: [MIT](LICENSE) © Syntropex. Voice, pictures and sounds: see [CREDITS.md](CREDITS.md) (Apache-2.0 voice model, MIT pictures, CC0 sounds).

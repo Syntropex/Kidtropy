@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { byId, ITEMS } from "../src/data/items";
+import { byId, EXTRAS, ITEMS } from "../src/data/items";
 import { findSpokenItem, heardItem, phraseMatches } from "../src/lib/match";
 import { ART } from "../src/art/art";
 
@@ -29,6 +29,7 @@ describe("heardItem", () => {
   it("accepts aliases", () => {
     expect(heardItem(["digger"], item("excavator"))).toBe(true);
     expect(heardItem(["a dinosaur"], item("trex"))).toBe(true);
+    expect(heardItem(["t rex"], item("trex"))).toBe(true);
     expect(heardItem(["choo choo"], item("train"))).toBe(true);
   });
 
@@ -57,7 +58,7 @@ describe("catalog", () => {
   });
 
   it("every item has a picture", () => {
-    for (const i of ITEMS) {
+    for (const i of [...ITEMS, ...EXTRAS]) {
       expect(Boolean(i.emoji) || Boolean(i.art && ART[i.art]), i.id).toBe(true);
     }
   });

@@ -4,7 +4,8 @@
 import { colorCar, colorTruck, raceCar } from "../art/art";
 import { speak } from "../lib/speech";
 import { settings } from "../lib/store";
-import { bounce, choiceGrid, h, makeDeck, pickOne, reward, shuffle, wait, wiggle } from "../lib/ui";
+import { bounce, choiceGrid, icon, h, makeDeck, pickOne, reward, shuffle, wait, wiggle } from "../lib/ui";
+import { COLOR_YES, line } from "../voice/lines";
 import type { Game } from "./types";
 
 export const COLORS = [
@@ -35,7 +36,7 @@ export const colors: Game = {
     const { root } = scene;
     // Start with the easy, very different colors.
     const next = makeDeck(() => COLORS, 4);
-    const prompt = h("button", { class: "prompt-btn", "aria-label": "Hear it again" }, "🔊");
+    const prompt = h("button", { class: "prompt-btn", "aria-label": "Hear it again" }, icon("🔊"));
     const board = h("div", { class: "choice-grid" });
     root.replaceChildren(h("div", { class: "find-wrap" }, prompt, board));
     let round = 0;
@@ -48,7 +49,7 @@ export const colors: Game = {
       const n = Math.max(2, Math.min(6, settings.choices));
       const others = shuffle(COLORS.filter((c) => c !== target)).slice(0, n - 1);
       const options = shuffle([target, ...others]);
-      const question = pickOne([`Tap the ${target.name} ${shape.name}!`, `Where's the ${target.name} ${shape.name}?`, `Find the ${target.name} one!`]);
+      const question = pickOne(line.colorQuestions(target.name, shape.name));
       let done = false;
 
       choiceGrid(board, n);
@@ -63,12 +64,12 @@ export const colors: Game = {
               b.classList.add("right");
               board.querySelectorAll(".choice").forEach((x) => x !== b && x.classList.add("fade"));
               void reward(b);
-              await speak(`${pickOne(["Yes!", "Great job!", "You did it!"])} ${target.name}!`);
+              await speak(line.colorWin(pickOne(COLOR_YES), target.name));
               await wait(700);
               if (live()) void play();
             } else {
               wiggle(b);
-              await speak(`That one is ${c.name}. Find ${target.name}!`);
+              await speak(line.colorWrong(c.name, target.name));
             }
           };
           return b;

@@ -5,17 +5,10 @@ import { speak } from "../lib/speech";
 import { sfx } from "../lib/sfx";
 import { settings } from "../lib/store";
 import { bounce, h, makeDeck, pic, pool, reward, shuffle, wait, wiggle } from "../lib/ui";
+import { line } from "../voice/lines";
 import type { Game } from "./types";
 
-const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
 
-function plural(name: string, n: number) {
-  if (n === 1) return name;
-  if (/(sheep|corn|T\. rex)$/i.test(name)) return name;
-  if (/(s|sh|ch|x)$/.test(name)) return `${name}es`;
-  if (/[^aeiou]y$/.test(name)) return `${name.slice(0, -1)}ies`;
-  return `${name}s`;
-}
 
 export const count: Game = {
   id: "count",
@@ -63,7 +56,7 @@ export const count: Game = {
           bounce(b);
           sfx.pop();
           tally.textContent = String(counted);
-          void speak(WORDS[counted]);
+          void speak(line.number(counted));
           if (counted === total) void finished();
         };
         field.append(b);
@@ -72,7 +65,7 @@ export const count: Game = {
       async function finished() {
         await wait(600);
         if (!live()) return;
-        await speak(`${WORDS[total]}! How many ${plural(item.name, 2)}?`);
+        await speak(line.countAsk(item, total));
         if (!live()) return;
         const opts = new Set([total]);
         while (opts.size < 3) {
@@ -90,12 +83,12 @@ export const count: Game = {
                 bounce(b);
                 b.classList.add("right");
                 void reward(b);
-                await speak(`Yes! ${WORDS[total]} ${plural(item.name, total)}!`);
+                await speak(line.countWin(total));
                 await wait(800);
                 if (live()) void play();
               } else {
                 wiggle(b);
-                void speak(`That's ${WORDS[n]}. Let's count again!`);
+                void speak(line.countWrong(n));
                 field.querySelectorAll<HTMLElement>(".count-thing").forEach((t, i) => setTimeout(() => bounce(t), i * 350));
               }
             };
@@ -105,7 +98,7 @@ export const count: Game = {
       }
 
       await wait(300);
-      if (live()) await speak(`Let's count the ${plural(item.name, total)}! Tap each one.`);
+      if (live()) await speak(line.countStart(item));
     }
 
     void play();

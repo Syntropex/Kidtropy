@@ -4,8 +4,9 @@
 import { ITEMS } from "../data/items";
 import { sfx } from "../lib/sfx";
 import { speak } from "../lib/speech";
-import { bounce, h, pic, pool, shuffle } from "../lib/ui";
+import { bounce, h, icon, pic, pool, shuffle } from "../lib/ui";
 import type { Game } from "./types";
+import { line, SAY } from "../voice/lines";
 
 export const sounds: Game = {
   id: "sounds",
@@ -14,9 +15,9 @@ export const sounds: Game = {
   color: "#66bb6a",
   start(scene) {
     const { root } = scene;
-    void speak("What do they say? Tap to find out!");
+    void speak(SAY.soundsIntro);
     const board = h("div", { class: "sound-board" });
-    const more = h("button", { class: "round-btn more-btn", "aria-label": "More pictures" }, "🔄");
+    const more = h("button", { class: "round-btn more-btn", "aria-label": "More pictures" }, icon("🔄"));
     root.replaceChildren(h("div", { class: "sounds-wrap" }, board, more));
 
     function fill() {
@@ -29,10 +30,8 @@ export const sounds: Game = {
             const b = h("button", { class: "sound-tile pop-in", "aria-label": item.name, style: `animation-delay:${i * 40}ms` }, pic(item));
             b.onclick = () => {
               bounce(b);
-              if (item.themes.includes("trucks") || item.themes.includes("racing")) sfx.honk();
-              else sfx.pop();
-              const verb = item.themes.some((t) => t === "animals" || t === "farm" || t === "dinos") ? "says" : "goes";
-              void speak(`The ${item.name} ${verb}... ${item.sound}`, { pitch: 1.2 });
+              sfx.pop();
+              void speak(line.saysWhat(item));
             };
             return b;
           }),

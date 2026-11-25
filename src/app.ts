@@ -11,7 +11,8 @@ import type { Game } from "./games/types";
 import { sfx, unlockAudio } from "./lib/sfx";
 import { cancelListening, micSupported, resetVoice, speak, stopSpeaking, unlockSpeech, voices } from "./lib/speech";
 import { progress, resetProgress, saveSettings, settings } from "./lib/store";
-import { bounce, h, pic, stickerItems, updateStarCount } from "./lib/ui";
+import { line, SAY } from "./voice/lines";
+import { bounce, h, icon, pic, stickerItems, updateStarCount } from "./lib/ui";
 
 export const GAMES: Game[] = [talk, find, count, colors, dig, race, abc, sounds];
 
@@ -19,15 +20,15 @@ const app = document.getElementById("app")!;
 let leave: AbortController | null = null;
 let unlocked = false;
 
-function header(opts: { back?: boolean; title?: string } = {}) {
+function header(opts: { back?: boolean; title?: string; icon?: string } = {}) {
   return h(
     "header",
     { class: "top" },
     opts.back
-      ? h("a", { class: "home-btn", href: "#/", "aria-label": "Home", onclick: () => sfx.tap() }, "🏠")
-      : h("div", { class: "logo", "aria-label": "Kidtropy" }, h("span", { class: "logo-mark" }, "🚜"), h("span", { class: "logo-text" }, "Kidtropy")),
-    opts.title ? h("div", { class: "title" }, opts.title) : h("div", { class: "spacer" }),
-    h("a", { class: "star-count", href: "#/stickers", "aria-label": "My stickers" }, "⭐", h("span", { class: "n" }, String(progress.stars))),
+      ? h("a", { class: "home-btn", href: "#/", "aria-label": "Home", onclick: () => sfx.tap() }, icon("🏠"))
+      : h("div", { class: "logo", "aria-label": "Kidtropy" }, h("span", { class: "logo-mark" }, icon("🚜")), h("span", { class: "logo-text" }, "Kidtropy")),
+    opts.title ? h("div", { class: "title" }, opts.icon ? icon(opts.icon) : "", opts.title) : h("div", { class: "spacer" }),
+    h("a", { class: "star-count", href: "#/stickers", "aria-label": "My stickers" }, icon("⭐"), h("span", { class: "n" }, String(progress.stars))),
   );
 }
 
@@ -46,7 +47,7 @@ function startScreen() {
     h(
       "div",
       { class: "start" },
-      h("div", { class: "start-parade", "aria-hidden": "true" }, "🚚🦖🚜🐄🏎️"),
+      h("div", { class: "start-parade", "aria-hidden": "true" }, ...["🚚", "🦖", "🚜", "🐄", "🏎️"].map((g) => icon(g))),
       h("h1", { class: "start-title" }, "Kidtropy"),
       h("button", { class: "play-btn", onclick: go, "aria-label": "Play" }, "▶"),
       h("p", { class: "start-note" }, "Turn the sound on! 🔊"),
@@ -58,8 +59,8 @@ function home() {
   const themeRow = h(
     "div",
     { class: "theme-row", role: "group", "aria-label": "What do you like?" },
-    h("button", { class: `theme-chip${settings.themes.length === 0 ? " on" : ""}`, style: "--c:#5c6bc0", "data-theme": "all", "aria-label": "Everything" }, "🌈"),
-    ...THEMES.map((t) => h("button", { class: `theme-chip${settings.themes.includes(t.id) ? " on" : ""}`, style: `--c:${t.color}`, "data-theme": t.id, "aria-label": t.label }, t.icon)),
+    h("button", { class: `theme-chip${settings.themes.length === 0 ? " on" : ""}`, style: "--c:#5c6bc0", "data-theme": "all", "aria-label": "Everything" }, icon("🌈")),
+    ...THEMES.map((t) => h("button", { class: `theme-chip${settings.themes.includes(t.id) ? " on" : ""}`, style: `--c:${t.color}`, "data-theme": t.id, "aria-label": t.label }, icon(t.icon))),
   );
   themeRow.addEventListener("click", (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".theme-chip");
@@ -75,8 +76,7 @@ function home() {
     });
     bounce(btn);
     sfx.tap();
-    const label = id === "all" ? "Everything!" : THEMES.find((t) => t.id === id)!.label;
-    void speak(id !== "all" && !settings.themes.includes(id) ? `No more ${label}` : `${label}!`);
+    void speak(id === "all" ? SAY.everything : line.theme(id, settings.themes.includes(id)));
   });
 
   const tiles = h(
@@ -86,7 +86,7 @@ function home() {
       h(
         "a",
         { class: "game-tile pop-in", href: `#/${g.id}`, style: `--c:${g.color}; animation-delay:${i * 50}ms`, "aria-label": g.title, onclick: () => sfx.pop() },
-        h("span", { class: "tile-icon", "aria-hidden": "true" }, g.icon),
+        h("span", { class: "tile-icon", "aria-hidden": "true" }, icon(g.icon)),
         h("span", { class: "tile-label" }, g.title),
       ),
     ),
@@ -137,13 +137,13 @@ function stickers() {
             "div",
             { class: "sticker-grid" },
             ...items.map((i) =>
-              h("button", { class: "sticker pop-in", "aria-label": i.name, onclick: (e: Event) => (bounce(e.currentTarget as Element), void speak(`${i.name}! ${i.sound ?? ""}`)) }, pic(i)),
+              h("button", { class: "sticker pop-in", "aria-label": i.name, onclick: (e: Event) => (bounce(e.currentTarget as Element), void speak(line.tapItem(i))) }, pic(i)),
             ),
           )
-        : h("div", { class: "empty-book" }, h("div", { class: "big-emoji" }, "⭐"), h("p", {}, "Play games to win stars and stickers!")),
+        : h("div", { class: "empty-book" }, h("div", { class: "big-emoji" }, icon("⭐")), h("p", {}, "Play games to win stars and stickers!")),
     ),
   );
-  void speak(items.length ? `You have ${items.length} sticker${items.length === 1 ? "" : "s"}! Tap them!` : "Play games to get stickers!");
+  void speak(items.length ? SAY.stickers : SAY.noStickers);
 }
 
 function grownups() {
@@ -151,19 +151,24 @@ function grownups() {
   const row = (label: string, control: HTMLElement, help?: string) =>
     h("label", { class: "set-row" }, h("span", { class: "set-label" }, label, help ? h("small", {}, help) : false), control);
 
-  const voiceSel = h("select", {}, h("option", { value: "" }, "Automatic"), ...vs.map((v) => h("option", { value: v.name, selected: v.name === settings.voiceName }, `${v.name} (${v.lang})`)));
+  const voiceSel = h(
+    "select",
+    {},
+    h("option", { value: "" }, "Kidtropy voice (natural)"),
+    h("option", { value: "device", selected: settings.voiceName === "device" }, "This device's voice"),
+    ...vs.map((v) => h("option", { value: v.name, selected: v.name === settings.voiceName }, `${v.name} (${v.lang})`)));
   voiceSel.onchange = () => {
     settings.voiceName = voiceSel.value;
     saveSettings();
     resetVoice();
-    void speak("Hi! This is my voice!");
+    void speak(SAY.voiceTest);
   };
 
   const rate = h("input", { type: "range", min: "0.6", max: "1.2", step: "0.05", value: String(settings.rate) });
   rate.onchange = () => {
     settings.rate = Number(rate.value);
     saveSettings();
-    void speak("Is this a good speed?");
+    void speak(SAY.speedTest);
   };
 
   const mic = h("input", { type: "checkbox", checked: settings.useMic });
@@ -208,7 +213,7 @@ function grownups() {
         {},
         h("h2", {}, "Settings"),
         row("Voice", voiceSel),
-        row("Talking speed", rate),
+        row("Talking speed", rate, "For the device voice."),
         row("Use microphone in Talk Time", mic, micSupported() ? "Your browser supports listening." : "This browser can't listen — try Safari on iPhone/iPad or Chrome on Android."),
         row("Sound effects", sfxBox),
         row("Choices in Find It & Colors", choices),
@@ -237,6 +242,7 @@ function grownups() {
           {},
           "Kidtropy has no accounts, ads, tracking or analytics. Stars and settings are stored only on this device. When the microphone is used, the browser's own speech service (Apple or Google) turns speech into text; Kidtropy never records or uploads audio.",
         ),
+        h("p", {}, "Voice: Kokoro (open source). Pictures: Microsoft Fluent Emoji (MIT) and original drawings. Animal and vehicle sounds: Freesound.org recordists (CC0)."),
         h("p", {}, "Free and open source: ", h("a", { href: "https://github.com/syntropex/kidtropy", target: "_blank", rel: "noopener" }, "github.com/syntropex/kidtropy")),
       ),
     ),
@@ -247,7 +253,7 @@ function playGame(game: Game) {
   const ctl = new AbortController();
   leave = ctl;
   const root = h("main", { class: `game game-${game.id}` });
-  app.replaceChildren(header({ back: true, title: `${game.icon} ${game.title}` }), root);
+  app.replaceChildren(header({ back: true, title: game.title, icon: game.icon }), root);
   const cleanup = game.start({ root, signal: ctl.signal, alive: () => !ctl.signal.aborted });
   if (cleanup) ctl.signal.addEventListener("abort", cleanup);
 }
@@ -276,7 +282,7 @@ export function route() {
     home();
     if (!sessionStorage.getItem("kidtropy.greeted")) {
       sessionStorage.setItem("kidtropy.greeted", "1");
-      void speak("Hi! Let's play! Pick a game!");
+      void speak(SAY.greet);
     }
   }
   window.scrollTo(0, 0);

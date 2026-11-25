@@ -1,8 +1,10 @@
 import { ART } from "../art/art";
+import PICS from "../data/pics.json";
 import { byId, ITEMS, itemsFor, type Item } from "../data/items";
 import { sfx } from "./sfx";
 import { speak } from "./speech";
 import { progress, saveProgress, settings } from "./store";
+import { line } from "../voice/lines";
 
 type Child = Node | string | number | false | null | undefined;
 type Props = Record<string, any> & { class?: string; style?: string };
@@ -29,12 +31,29 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, props: Props = 
   return el;
 }
 
-/** The picture for an item: SVG art if we drew one, otherwise its emoji. */
+const PIC_BY_GLYPH = PICS as Record<string, string>;
+const picFor = (glyph: string) => PIC_BY_GLYPH[glyph.replace(/\uFE0F/g, "")];
+
+/**
+ * The picture for an item: our SVG art if we drew one, else its Fluent Emoji
+ * picture (public/pics/), else the device's emoji.
+ */
 export function pic(item: Item, cls = ""): HTMLElement {
   if (item.art && ART[item.art]) {
     return h("span", { class: `pic art ${cls}`, html: ART[item.art], "aria-hidden": "true" });
   }
+  const file = item.emoji && picFor(item.emoji);
+  if (file) {
+    return h("span", { class: `pic art ${cls}`, "aria-hidden": "true" }, h("img", { src: `/pics/${file}.webp`, alt: "", draggable: "false", decoding: "async" }));
+  }
   return h("span", { class: `pic emoji ${cls}`, "aria-hidden": "true" }, item.emoji ?? "❓");
+}
+
+/** An emoji-sized icon: the Fluent picture for this emoji when we have it. */
+export function icon(glyph: string, cls = ""): HTMLElement {
+  const file = picFor(glyph);
+  if (file) return h("img", { class: `ico ${cls}`, src: `/pics/${file}.webp`, alt: "", draggable: "false", "aria-hidden": "true" });
+  return h("span", { class: `ico-emoji ${cls}`, "aria-hidden": "true" }, glyph);
 }
 
 /** Lay out a .choice-grid for n pictures in both orientations. */
@@ -141,7 +160,7 @@ function flyStar(from?: Element | null) {
   const start = centerOf(from) ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
   const target = document.querySelector(".star-count");
   const end = centerOf(target) ?? { x: window.innerWidth - 40, y: 30 };
-  const s = h("div", { class: "flying-star", "aria-hidden": "true" }, "⭐");
+  const s = h("div", { class: "flying-star", "aria-hidden": "true" }, icon("⭐"));
   s.style.left = `${start.x}px`;
   s.style.top = `${start.y}px`;
   s.style.setProperty("--dx", `${end.x - start.x}px`);
@@ -187,7 +206,7 @@ async function stickerPopup() {
     document.body.append(overlay);
     sfx.sticker();
     confetti(80);
-    void speak(`Wow! You got a new sticker! ${capitalize(item.name)}!`);
+    void speak(line.newSticker(item));
     setTimeout(() => close(), 6000);
   });
 }
