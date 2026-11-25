@@ -12,7 +12,8 @@
     "test": "vitest run",
     "deploy": "npm run build && wrangler deploy",
     "voice": "python3 scripts/voice/generate.py",
-    "sounds": "python3 scripts/sounds/fetch.py"
+    "sounds": "python3 scripts/sounds/fetch.py",
+    "pics": "python3 scripts/pics/fetch.py"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

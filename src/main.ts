@@ -1,4 +1,5 @@
 import "./styles.css";
+import "./learn/learn.css";
 import { boot } from "./app";
 
 boot();

@@ -1,17 +1,18 @@
 import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { abcItems, abcPairs, ABC_WORDS } from "../src/data/abc";
-import { EXTRAS, ITEMS } from "../src/data/items";
+import { abcItems, ABC_WORDS } from "../src/data/abc";
+import { ITEMS } from "../src/data/items";
 import PICS from "../src/data/pics.json";
 import MANIFEST from "../src/voice/manifest.json";
 import SOUNDS from "../src/voice/sounds.json";
-import { allLines, clipId, line, splitLine } from "../src/voice/lines";
+import { clipId, line, splitLine } from "../src/voice/lines";
+import { everySentence } from "../src/voice/all-lines";
 
 const root = new URL("..", import.meta.url).pathname;
 
 describe("voice clips", () => {
   const clips = new Set(MANIFEST.clips);
-  const sentences = allLines(EXTRAS, abcPairs());
+  const sentences = everySentence();
 
   it("every sentence the app says has a recorded clip (run `npm run voice`)", () => {
     const missing = sentences.filter((s) => !clips.has(clipId(s)));

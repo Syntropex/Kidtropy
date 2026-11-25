@@ -70,6 +70,7 @@ def main():
 
     items = lines()
     wanted = {x["id"]: x["text"] for x in items}
+    phonemes = {x["id"]: x["phonemes"] for x in items if x.get("phonemes")}
     os.makedirs(OUT, exist_ok=True)
     short_only = "--short" in sys.argv  # re-record only one/two-word phrases
     todo = [
@@ -82,7 +83,7 @@ def main():
         k = model()
         with tempfile.TemporaryDirectory() as tmp:
             for n, (cid, text) in enumerate(todo, 1):
-                text = SPEAK_AS.get(text, text)
+                text = "/" + phonemes[cid] if cid in phonemes else SPEAK_AS.get(text, text)
                 fixes = [f for f in PHONEME_FIXES if f[0].search(text)]
                 if text.startswith("/"):
                     samples, sr = k.create(text[1:], voice=VOICE, speed=speed_for(text), is_phonemes=True)
