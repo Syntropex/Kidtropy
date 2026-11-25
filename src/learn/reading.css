@@ -12,7 +12,7 @@
 }
 
 .rd-letter {
-  font-size: clamp(84px, min(26vw, 19vh), 170px);
+  font-size: clamp(84px, min(30vw, 20vh), 180px);
   font-weight: 900;
   line-height: 1;
   color: #1e88e5;
@@ -86,7 +86,39 @@
 }
 
 .lesson-big.rd-small {
-  font-size: min(18vw, 16vh, 130px);
+  font-size: min(20vw, 16vh, 140px);
+  margin: 0 0.1em;
+}
+
+/* Bigger words on lesson slides than in questions. */
+.lesson-card .rd-word {
+  font-size: clamp(60px, min(20vw, 14vh), 150px);
+}
+
+.lesson-card .rd-chip {
+  font-size: clamp(36px, 10vw, 64px);
+}
+
+/* A sentence with its picture on top. */
+.rd-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.rd-sent .rd-pic {
+  width: clamp(70px, min(24vw, 12vh), 130px);
+  height: clamp(70px, min(24vw, 12vh), 130px);
+}
+
+.lesson-card .rd-sent .rd-pic {
+  width: min(36vw, 20vh, 200px);
+  height: min(36vw, 20vh, 200px);
+}
+
+.lesson-card .rd-sentence {
+  font-size: clamp(36px, min(10vw, 7vh), 72px);
 }
 
 .rd-chip {
@@ -100,8 +132,8 @@
 }
 
 .rd-thumb {
-  width: min(30vw, 18vh, 150px);
-  height: min(30vw, 18vh, 150px);
+  width: min(34vw, 20vh, 180px);
+  height: min(34vw, 20vh, 180px);
   display: flex;
 }
 

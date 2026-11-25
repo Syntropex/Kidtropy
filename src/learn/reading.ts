@@ -55,6 +55,8 @@ function card(big: string, word?: string): HTMLElement {
   );
 }
 
+const sentenceView = (pic: string, text: string) => h("div", { class: "rd-sent" }, rdPic(pic), h("div", { class: "rd-sentence" }, text));
+
 const row = (...items: (HTMLElement | string)[]) => h("div", { class: "rd-row" }, ...items);
 
 // ---------------------------------------------------------------------------
@@ -346,7 +348,7 @@ function sentenceQ(): Maker {
       return {
         prompt: SAY.readSentence,
         hint: `${s.text} ${SAY.isItTrue}`,
-        show: () => stage(rdPic(s.pic, "small"), h("div", { class: "rd-sentence" }, s.text)),
+        show: () => stage(sentenceView(s.pic, s.text)),
         praise: s.why,
         style: "pics",
         choices: [
@@ -361,7 +363,7 @@ function sentenceQ(): Maker {
 
 const VOWELS: Sound[] = ["a", "e", "i", "o", "u"].map((v) => {
   const s = SOUNDS.find((x) => x.letters === v);
-  return s ?? { id: v, letters: v, say: v, ph: "ˈɪː", words: [] };
+  return s ?? { id: v, letters: v, say: v, ph: "ˈɪ", words: [] };
 });
 const cvcWith = (v: string) => CVC.filter((w) => w[1] === v);
 
@@ -473,7 +475,7 @@ const soundLessons = SOUND_GROUPS.map((ids, i) => {
 function sightLessons(list: string[], grade: Grade, skillId: string, icons: string[]): Lesson[] {
   return icons.map((icon, i) => {
     const words = list.slice(i * 5, i * 5 + 5);
-    return lesson(`l-${skillId}-${i + 1}`, grade, words.join(" "), icon, () => ({
+    return lesson(`l-${skillId}-${i + 1}`, grade, `Sight words ${i + 1}`, icon, () => ({
       slides: [
         { say: "Let's learn new words!", show: () => row(...words.map((w) => h("span", { class: "rd-chip" }, w))) },
         ...words.map((w) => ({ say: SAY.thisWord(w), show: () => stage(rdWord(w)) })),
@@ -550,10 +552,10 @@ const familyLesson = lesson("l-word-families", "g1", "Word families", "🏡", ()
   count: 5,
 }));
 
-const sentenceLesson = lesson("l-sentences", "g1", "Reading sentences", "📜", () => {
+const sentenceLesson = lesson("l-sentences", "g1", "Reading sentences", "📝", () => {
   const [yes, no] = [SENTENCES.find((s) => s.text === "A fish can swim.")!, SENTENCES.find((s) => s.text === "A cow can fly.")!];
   const show = (s: typeof yes, thumb: string) => () =>
-    h("div", { class: "rd-card" }, stage(rdPic(s.pic, "small"), h("div", { class: "rd-sentence" }, s.text)), h("div", { class: "rd-thumb" }, glyphPic(thumb)));
+    h("div", { class: "rd-card" }, stage(sentenceView(s.pic, s.text)), h("div", { class: "rd-thumb" }, glyphPic(thumb)));
   return {
     slides: [
       { say: LESSON_SAY.sentences, show: () => row(rdPic("thumb", "lesson"), h("div", { class: "rd-pic lesson" }, glyphPic("👎"))) },
@@ -584,13 +586,13 @@ export const READING_LESSONS: Lesson[] = [
   ...letterLessons,
   ...soundLessons,
   rhymeLesson,
-  ...sightLessons(SIGHT_K, "k", "sight-k", BOOKS),
   shortWordsLesson,
+  ...sightLessons(SIGHT_K, "k", "sight-k", BOOKS),
   digraphLesson,
   familyLesson,
   vowelLesson,
-  ...sightLessons(SIGHT_G1, "g1", "sight-g1", BOOKS),
   sentenceLesson,
+  ...sightLessons(SIGHT_G1, "g1", "sight-g1", BOOKS),
 ];
 
 // ---------------------------------------------------------------------------

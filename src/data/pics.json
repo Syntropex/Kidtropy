@@ -123,7 +123,7 @@
 "📘": "blue-book",
 "📙": "orange-book",
 "📚": "books",
-"📜": "scroll",
+"📝": "memo",
 "📦": "package",
 "📱": "mobile-phone",
 "🔀": "shuffle-tracks-button",
@@ -196,7 +196,6 @@
 "🦭": "seal",
 "🦴": "bone",
 "🦵": "leg",
-"🦶": "foot",
 "🦷": "tooth",
 "🧀": "cheese-wedge",
 "🧃": "beverage-box",
@@ -219,6 +218,5 @@
 "🪱": "worm",
 "🪵": "wood",
 "🪺": "nest-with-eggs",
-"🪼": "jellyfish",
-"🫙": "jar"
+"🪼": "jellyfish"
 }

@@ -18,11 +18,11 @@ export const PIC: Record<string, string> = {
   bus: "🚌", bee: "🐝", bear: "🐻", banana: "🍌", bed: "🛏️", bell: "🔔", bat: "🦇", box: "📦", bug: "🐛", bone: "🦴", boat: "⛵", bird: "🐦", bread: "🍞", balloon: "🎈",
   cat: "🐱", cow: "🐮", car: "🚗", cake: "🎂", corn: "🌽", coat: "🧥", clock: "⏰",
   dog: "🐶", duck: "🦆", door: "🚪", deer: "🦌",
-  fish: "🐟", fox: "🦊", fire: "🔥", foot: "🦶", frog: "🐸",
+  fish: "🐟", fox: "🦊", fire: "🔥", frog: "🐸",
   goat: "🐐", gorilla: "🦍", ghost: "👻", guitar: "🎸",
   horse: "🐴", house: "🏠", hammer: "🔨", heart: "❤️", hippo: "🦛", hat: "🎩",
   "ice cream": "🍦",
-  juice: "🧃", jellyfish: "🪼", jar: "🫙",
+  juice: "🧃", jellyfish: "🪼",
   kite: "🪁", key: "🔑", kangaroo: "🦘", koala: "🐨", king: "🤴",
   lion: "🦁", lemon: "🍋", leaf: "🍁", ladybug: "🐞", lollipop: "🍭", log: "🪵", leg: "🦵",
   monkey: "🐵", moon: "🌙", mouse: "🐭", milk: "🥛", mushroom: "🍄", map: "🗺️",
@@ -30,7 +30,7 @@ export const PIC: Record<string, string> = {
   pig: "🐷", penguin: "🐧", pizza: "🍕", pear: "🍐", panda: "🐼", popcorn: "🍿", pen: "🖊️", pin: "📌", phone: "📱",
   queen: "👸",
   rocket: "🚀", rainbow: "🌈", ring: "💍", robot: "🤖", rose: "🌹", rat: "🐀", rock: "🪨",
-  sun: "☀️", sock: "🧦", seal: "🦭", sandwich: "🥪", snake: "🐍", star: "⭐", spoon: "🥄", sled: "🛷", snail: "🐌", six: "6️⃣",
+  sun: "☀️", sock: "🧦", seal: "🦭", sandwich: "🥪", snake: "🐍", star: "⭐", spoon: "🥄", sled: "🛷", snail: "🐌",
   tiger: "🐯", turtle: "🐢", tooth: "🦷", tent: "⛺", tomato: "🍅", taco: "🌮", ten: "🔟", tree: "🌳", truck: "🚚",
   van: "🚐", volcano: "🌋", violin: "🎻",
   watermelon: "🍉", worm: "🪱", wolf: "🐺", web: "🕸️", watch: "⌚",
@@ -40,7 +40,7 @@ export const PIC: Record<string, string> = {
   // digraphs
   sheep: "🐑", shoe: "👟", ship: "🚢", shark: "🦈", shell: "🐚", shirt: "👕",
   chicken: "🐔", cheese: "🧀", chair: "🪑", cherry: "🍒", chick: "🐤",
-  thumb: "👍", three: "3️⃣", thermometer: "🌡️",
+  thumb: "👍", thermometer: "🌡️",
   whale: "🐳", wheel: "🛞",
   // sentences
   ice: "🧊", ball: "⚽",
@@ -100,40 +100,45 @@ export interface Sound {
   words: string[];
 }
 
-const V = (ph: string) => `ˈ${ph}ː`; // a vowel or a hummable sound, held a little
-const STOP = (ph: string) => `${ph}ˈʌ`; // a stop: "buh"
+// Kokoro can't say a consonant on its own: it adds a vowel in front ("sss" comes out
+// as "ess", like the letter name). So consonants get a short "uh" after them, and
+// sounds you can hold (m, s, f...) are held first: "sss-uh". Checked by listening for
+// voicing in the synthesized audio and with Whisper.
+const VOWEL = (ph: string) => `ˈ${ph}ː`;
+const HOLD = (ph: string) => `${ph}ːˈʌ`; // "mmm-uh", "sss-uh"
+const STOP = (ph: string) => `${ph}ˈʌ`; // "buh"
 
 export const SOUNDS: Sound[] = [
-  { id: "a", letters: "a", say: "a", ph: V("æ"), words: ["apple", "ant", "astronaut"] },
+  { id: "a", letters: "a", say: "a", ph: VOWEL("æ"), words: ["apple", "ant", "astronaut"] },
   { id: "b", letters: "b", say: "buh", ph: STOP("b"), words: ["bus", "bee", "bear", "banana", "bed", "bell"] },
   { id: "k", letters: "c", say: "kuh", ph: STOP("k"), words: ["cat", "cow", "car", "cake", "corn"] },
   { id: "d", letters: "d", say: "duh", ph: STOP("d"), words: ["dog", "duck", "door", "deer"] },
-  { id: "e", letters: "e", say: "e", ph: V("ɛ"), words: ["egg", "elephant"] },
-  { id: "f", letters: "f", say: "fff", ph: V("f"), words: ["fish", "fox", "fire", "foot"] },
+  { id: "e", letters: "e", say: "e", ph: VOWEL("ɛ"), words: ["egg", "elephant"] },
+  { id: "f", letters: "f", say: "fff", ph: HOLD("f"), words: ["fish", "fox", "fire"] },
   { id: "g", letters: "g", say: "guh", ph: STOP("ɡ"), words: ["goat", "gorilla", "ghost", "guitar"] },
   { id: "h", letters: "h", say: "huh", ph: STOP("h"), words: ["horse", "house", "hammer", "heart", "hippo"] },
   { id: "j", letters: "j", say: "juh", ph: STOP("dʒ"), words: ["juice", "jellyfish"] },
   { id: "k2", letters: "k", say: "kuh", ph: STOP("k"), words: ["kite", "key", "kangaroo", "koala"] },
-  { id: "l", letters: "l", say: "lll", ph: V("l"), words: ["lion", "lemon", "leaf", "ladybug", "lollipop"] },
-  { id: "m", letters: "m", say: "mmm", ph: V("m"), words: ["moon", "monkey", "mouse", "milk", "mushroom"] },
-  { id: "n", letters: "n", say: "nnn", ph: V("n"), words: ["nose", "nest"] },
-  { id: "o", letters: "o", say: "o", ph: V("ɑ"), words: ["octopus", "otter"] },
+  { id: "l", letters: "l", say: "lll", ph: HOLD("l"), words: ["lion", "lemon", "leaf", "ladybug", "lollipop"] },
+  { id: "m", letters: "m", say: "mmm", ph: HOLD("m"), words: ["moon", "monkey", "mouse", "milk", "mushroom"] },
+  { id: "n", letters: "n", say: "nnn", ph: HOLD("n"), words: ["nose", "nest"] },
+  { id: "o", letters: "o", say: "o", ph: VOWEL("ɑ"), words: ["octopus", "otter"] },
   { id: "p", letters: "p", say: "puh", ph: STOP("p"), words: ["pig", "penguin", "pizza", "pear", "panda", "popcorn"] },
-  { id: "r", letters: "r", say: "rrr", ph: V("ɹ"), words: ["rocket", "rainbow", "ring", "robot", "rose"] },
-  { id: "s", letters: "s", say: "sss", ph: V("s"), words: ["sun", "sock", "seal", "sandwich", "snake"] },
+  { id: "r", letters: "r", say: "rrr", ph: HOLD("ɹ"), words: ["rocket", "rainbow", "ring", "robot", "rose"] },
+  { id: "s", letters: "s", say: "sss", ph: HOLD("s"), words: ["sun", "sock", "seal", "sandwich", "snake"] },
   { id: "t", letters: "t", say: "tuh", ph: STOP("t"), words: ["tiger", "turtle", "tooth", "tent", "tomato", "taco"] },
-  { id: "u", letters: "u", say: "u", ph: V("ʌ"), words: ["umbrella"] },
-  { id: "v", letters: "v", say: "vvv", ph: V("v"), words: ["van", "volcano", "violin"] },
+  { id: "u", letters: "u", say: "u", ph: VOWEL("ʌ"), words: ["umbrella"] },
+  { id: "v", letters: "v", say: "vvv", ph: HOLD("v"), words: ["van", "volcano", "violin"] },
   { id: "w", letters: "w", say: "wuh", ph: STOP("w"), words: ["watermelon", "worm", "wolf", "web", "watch"] },
   { id: "y", letters: "y", say: "yuh", ph: STOP("j"), words: ["yo-yo", "yarn"] },
-  { id: "z", letters: "z", say: "zzz", ph: V("z"), words: ["zebra"] },
+  { id: "z", letters: "z", say: "zzz", ph: HOLD("z"), words: ["zebra"] },
 ];
 
 /** Two letters, one sound (1st grade). */
 export const DIGRAPHS: Sound[] = [
-  { id: "sh", letters: "sh", say: "shh", ph: V("ʃ"), words: ["sheep", "shoe", "ship", "shark", "shell", "shirt"] },
+  { id: "sh", letters: "sh", say: "shh", ph: HOLD("ʃ"), words: ["sheep", "shoe", "ship", "shark", "shell", "shirt"] },
   { id: "ch", letters: "ch", say: "ch", ph: STOP("tʃ"), words: ["chicken", "cheese", "chair", "cherry", "chick"] },
-  { id: "th", letters: "th", say: "th", ph: V("θ"), words: ["thumb", "three", "thermometer"] },
+  { id: "th", letters: "th", say: "th", ph: HOLD("θ"), words: ["thumb", "thermometer"] },
   { id: "wh", letters: "wh", say: "wh", ph: STOP("w"), words: ["whale", "wheel"] },
 ];
 
@@ -153,7 +158,7 @@ export const RHYMES: string[][] = [
   ["bee", "tree", "key"],
   ["cake", "snake"],
   ["moon", "spoon", "balloon"],
-  ["star", "car", "jar"],
+  ["star", "car"],
   ["fox", "box"],
   ["bear", "pear", "chair"],
   ["goat", "boat", "coat"],
@@ -170,7 +175,7 @@ export const RHYMES: string[][] = [
 ];
 
 /** Short-vowel consonant-vowel-consonant words with pictures. */
-export const CVC = ["cat", "hat", "bat", "rat", "map", "van", "bed", "web", "pen", "ten", "leg", "pig", "pin", "six", "dog", "log", "box", "fox", "sun", "bus", "bug"];
+export const CVC = ["cat", "hat", "bat", "rat", "map", "van", "bed", "web", "pen", "ten", "leg", "pig", "pin", "dog", "log", "box", "fox", "sun", "bus", "bug"];
 
 /** Word families: words with pictures first, then more words in the family. */
 export interface Family {
@@ -196,7 +201,7 @@ export const FAMILIES: Family[] = [
   { rime: "ock", pics: ["sock", "rock", "clock"], more: ["lock", "dock"] },
   { rime: "ee", pics: ["bee", "tree"], more: ["see", "free"] },
   { rime: "oat", pics: ["goat", "boat", "coat"], more: ["moat"] },
-  { rime: "ar", pics: ["car", "star", "jar"], more: ["far"] },
+  { rime: "ar", pics: ["car", "star"], more: ["far", "jar"] },
   { rime: "oon", pics: ["moon", "spoon"], more: ["soon", "noon"] },
   { rime: "ail", pics: ["snail"], more: ["mail", "tail", "nail", "pail"] },
   { rime: "ish", pics: ["fish"], more: ["dish", "wish"] },
