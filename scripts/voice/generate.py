@@ -20,6 +20,20 @@ FILES = ["kokoro-v1.0.onnx", "voices-v1.0.bin"]
 
 VOICE = os.environ.get("KIDTROPY_VOICE", "af_heart")  # warm, friendly US English
 SPEED = float(os.environ.get("KIDTROPY_SPEED", "0.9"))  # a little slower for little ears
+# Slowing down one- or two-word phrases makes Kokoro garble them ("Six!"), so those use normal speed.
+SHORT_SPEED = 1.0
+
+
+def speed_for(text):
+    return SHORT_SPEED if len(re.findall(r"[A-Za-z0-9']+", text)) <= 2 else SPEED
+
+# Say these differently than they're written (the clip still answers to the original text).
+SPEAK_AS = {
+    "Six!": "/sˈɪks.",  # a leading "/" means: these are phonemes
+    "Set...": "Set.",
+    "Woo hoo!": "/wˈuː hˈuː!",
+    "E!": "E.",
+}
 
 # Pronunciation fixes, applied to the phonemes of matching sentences.
 PHONEME_FIXES = [
@@ -57,21 +71,28 @@ def main():
     items = lines()
     wanted = {x["id"]: x["text"] for x in items}
     os.makedirs(OUT, exist_ok=True)
-    todo = [(i, t) for i, t in wanted.items() if redo or not os.path.exists(os.path.join(OUT, f"{i}.mp3"))]
+    short_only = "--short" in sys.argv  # re-record only one/two-word phrases
+    todo = [
+        (i, t) for i, t in wanted.items()
+        if redo or (short_only and speed_for(t) == SHORT_SPEED) or not os.path.exists(os.path.join(OUT, f"{i}.mp3"))
+    ]
     print(f"{len(wanted)} sentences, {len(todo)} to record with {VOICE}", flush=True)
 
     if todo:
         k = model()
         with tempfile.TemporaryDirectory() as tmp:
             for n, (cid, text) in enumerate(todo, 1):
+                text = SPEAK_AS.get(text, text)
                 fixes = [f for f in PHONEME_FIXES if f[0].search(text)]
-                if fixes:
+                if text.startswith("/"):
+                    samples, sr = k.create(text[1:], voice=VOICE, speed=speed_for(text), is_phonemes=True)
+                elif fixes:
                     ph = k.tokenizer.phonemize(text, "en-us")
                     for _, bad, good in fixes:
                         ph = ph.replace(bad, good)
-                    samples, sr = k.create(ph, voice=VOICE, speed=SPEED, is_phonemes=True)
+                    samples, sr = k.create(ph, voice=VOICE, speed=speed_for(text), is_phonemes=True)
                 else:
-                    samples, sr = k.create(text, voice=VOICE, speed=SPEED, lang="en-us")
+                    samples, sr = k.create(text, voice=VOICE, speed=speed_for(text), lang="en-us")
                 wav = os.path.join(tmp, "x.wav")
                 sf.write(wav, samples, sr)
                 subprocess.run(
