@@ -1,0 +1,750 @@
+/* Drawing studio (src/games/draw*.ts) */
+
+body:has(.game-draw) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.game-draw {
+  --b: clamp(56px, calc((100vw - 24px - 4 * 8px) / 5), 78px);
+  --ink: #2b2b3a;
+  flex: 1 1 0;
+  height: 0;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.d-svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.d-svg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* ---- buttons --------------------------------------------------------------- */
+
+.d-btn {
+  flex: none;
+  width: var(--b);
+  height: var(--b);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--b) * 0.52);
+  line-height: 1;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.d-btn .d-svg {
+  width: 64%;
+  height: 64%;
+}
+
+.d-btn .ico {
+  width: 0.95em;
+  height: 0.95em;
+  vertical-align: 0;
+}
+
+.d-btn:active,
+.d-crayon:active,
+.d-size:active,
+.d-stamp:active,
+.d-card:active,
+.cp-thumb:active,
+.g-frame:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+
+.d-flex {
+  flex: 1;
+}
+
+/* ---- screens ---------------------------------------------------------------- */
+
+.d-screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.d-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.d-fitgrid {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: var(--gap, 12px);
+  padding-bottom: 8px;
+}
+
+.d-fitgrid > * {
+  width: var(--cell, 120px);
+  height: var(--cell, 120px);
+}
+
+/* ---- studio home ---------------------------------------------------------------- */
+
+.d-home {
+  height: 100%;
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 4px 0 10px;
+}
+
+.d-card {
+  position: relative;
+  border-radius: 34px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.d-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.45), transparent 45%);
+  pointer-events: none;
+}
+
+.d-card-color {
+  background: linear-gradient(160deg, #ffe082, #ffb74d);
+}
+
+.d-card-free {
+  background: linear-gradient(160deg, #f8bbd0, #ce93d8);
+}
+
+.d-card-art {
+  background: linear-gradient(160deg, #b2ebf2, #81d4fa);
+}
+
+.d-card-face {
+  position: relative;
+  height: 82%;
+  aspect-ratio: 1;
+  max-width: 82%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.d-card-face > svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.12));
+}
+
+.d-card-crayons {
+  position: absolute;
+  right: -22%;
+  bottom: -4%;
+  width: 52%;
+  height: 52%;
+  transform: rotate(10deg);
+}
+
+.d-squiggle {
+  width: 100%;
+  height: 100%;
+}
+
+.d-card-spark {
+  position: absolute;
+  right: -6%;
+  top: 0;
+  width: 36%;
+  height: 36%;
+  animation: d-twinkle 1.8s ease-in-out infinite;
+}
+
+.d-frame-face {
+  width: auto;
+}
+
+.d-frame-ico {
+  width: 100%;
+  height: 100%;
+}
+
+.d-frame-pic {
+  position: absolute;
+  left: 20%;
+  top: 26%;
+  width: 60%;
+  height: 48%;
+  background: #fff;
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.d-frame-pic > svg,
+.d-frame-pic > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@keyframes d-twinkle {
+  50% {
+    transform: scale(1.18) rotate(12deg);
+  }
+}
+
+/* ---- studio layout (portrait: stacked; landscape: tools | paper | side) ------ */
+
+.d-studio {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  padding-bottom: 12px;
+}
+
+.d-tools {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.d-paper-cell {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+}
+
+.d-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+/* ---- palette ------------------------------------------------------------------- */
+
+.d-palette,
+.d-tray {
+  --cols: 5;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-auto-rows: calc(var(--b) * 1.12);
+  gap: 4px 6px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+.fd-studio .d-palette,
+.fd-studio .d-tray {
+  --cols: 6;
+}
+
+.fd-studio .d-palette,
+.fd-studio .d-tray {
+  grid-auto-rows: calc(var(--b) * 0.8);
+}
+
+.d-crayon,
+.d-size {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-radius: 16px;
+  transition: transform 0.18s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.d-crayon svg {
+  height: 96%;
+  width: auto;
+  display: block;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.15));
+  transform: translateY(4%);
+  transition: transform 0.2s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.d-crayon.sel {
+  background: radial-gradient(circle at 50% 60%, #fff3c4 0 58%, transparent 60%);
+}
+
+.d-crayon.sel svg {
+  transform: translateY(-4%) scale(1.08);
+}
+
+.d-size {
+  align-items: center;
+}
+
+.d-size .d-svg {
+  width: 74%;
+  height: 74%;
+}
+
+.d-size.sel {
+  background: #fff3c4;
+  box-shadow: inset 0 0 0 3px #ffb300;
+}
+
+.d-palette .d-size:first-of-type {
+  grid-column-start: auto;
+}
+
+/* ---- brushes ---------------------------------------------------------------------- */
+
+.d-brushes {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  justify-items: center;
+}
+
+.d-brush {
+  width: min(var(--b), 100%);
+  height: calc(var(--b) * 0.86);
+  border-radius: 22px;
+}
+
+.d-brush.sel {
+  background: #fff3c4;
+  box-shadow: 0 0 0 4px #ffb300, var(--shadow);
+  transform: translateY(-3px);
+}
+
+.d-brush .d-svg {
+  width: 70%;
+  height: 76%;
+}
+
+.d-brush .d-crayon-ico svg {
+  transform: rotate(30deg);
+}
+
+/* ---- stamps ------------------------------------------------------------------------- */
+
+.d-stamp {
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.d-stamp .pic {
+  width: 100%;
+  height: 100%;
+}
+
+.d-stamp .pic img,
+.d-stamp .pic .ico {
+  width: 100%;
+  height: 100%;
+}
+
+.d-stamp.sel {
+  background: #fff3c4;
+  box-shadow: inset 0 0 0 3px #ffb300;
+}
+
+/* ---- coloring pages ------------------------------------------------------------- */
+
+.cp-thumb {
+  position: relative;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: var(--shadow);
+  padding: calc(var(--cell, 120px) * 0.08);
+  display: flex;
+}
+
+.cp-thumb > svg,
+.cp-thumb > .pic {
+  width: 100%;
+  height: 100%;
+}
+
+.cp-badge {
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  width: 34%;
+  height: 34%;
+}
+
+.cp-paper {
+  position: relative;
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+  padding: 3%;
+  touch-action: none;
+}
+
+.cp-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+  touch-action: none;
+}
+
+.cp-svg [data-r] {
+  cursor: pointer;
+  transition: fill 0.12s, stroke 0.12s;
+}
+
+.cp-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cp-pop 0.32s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@keyframes cp-pop {
+  40% {
+    transform: scale(1.07);
+  }
+}
+
+.cp-ripple {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  border: 5px solid var(--c);
+  pointer-events: none;
+  animation: cp-ripple 0.55s ease-out forwards;
+}
+
+@keyframes cp-ripple {
+  to {
+    transform: scale(5);
+    opacity: 0;
+  }
+}
+
+.cp-framed {
+  animation: cp-framed 1.2s ease-out;
+  box-shadow: 0 0 0 10px #ffd54f, 0 6px 0 10px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes cp-framed {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.04) rotate(-1deg);
+  }
+  50% {
+    transform: scale(0.99) rotate(1deg);
+  }
+}
+
+/* ---- free drawing ---------------------------------------------------------------- */
+
+.fd-paper {
+  position: relative;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.fd-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  cursor: crosshair;
+}
+
+.fd-canvas.stamping {
+  cursor: copy;
+}
+
+.fd-stamp-pop {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(var(--rot));
+  animation: fd-stamp 0.26s cubic-bezier(0.3, 1.6, 0.5, 1);
+  display: flex;
+}
+
+.fd-stamp-pop .pic,
+.fd-stamp-pop img {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes fd-stamp {
+  from {
+    transform: translate(-50%, -50%) rotate(var(--rot)) scale(1.6);
+    opacity: 0.2;
+  }
+}
+
+.fd-saved {
+  animation: cp-framed 1.2s ease-out;
+}
+
+/* ---- overlays ----------------------------------------------------------------------- */
+
+.d-overlay {
+  --b: 92px;
+}
+
+.d-confirm {
+  background: #fff;
+  border-radius: 36px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.18);
+  animation: pop-in 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.d-confirm-face {
+  width: 150px;
+  height: 150px;
+  display: flex;
+}
+
+.d-confirm-face .d-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.d-confirm-row,
+.g-view-row {
+  display: flex;
+  gap: 22px;
+  justify-content: center;
+}
+
+.d-yes {
+  box-shadow: 0 0 0 5px #66bb6a, var(--shadow);
+}
+
+.d-confirm.danger .d-yes {
+  box-shadow: 0 0 0 5px #ff8a80, var(--shadow);
+}
+
+/* ---- gallery ---------------------------------------------------------------------------- */
+
+.g-frame {
+  padding: calc(var(--cell, 120px) * 0.07);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffca28, #ff9800);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18), inset 0 0 0 4px rgba(255, 255, 255, 0.35);
+  transform: rotate(var(--tilt, 0deg));
+  display: flex;
+}
+
+.g-mat {
+  flex: 1;
+  min-width: 0;
+  background: #fff;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.g-mat > svg,
+.g-mat > img,
+.g-view-art > svg,
+.g-view-art > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.g-mat > svg {
+  padding: 6%;
+}
+
+.g-view-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  animation: pop-in 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.g-view-art {
+  width: min(88vw, calc(100dvh - 220px), 760px);
+  height: min(88vw, calc(100dvh - 220px), 760px);
+  background: #fff;
+  border-radius: 16px;
+  border: 14px solid #ffb300;
+  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.2);
+  display: flex;
+  overflow: hidden;
+}
+
+.g-view-art > svg {
+  padding: 4%;
+}
+
+.g-view .d-btn {
+  --b: 80px;
+}
+
+.g-view-row {
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.g-view .d-go {
+  box-shadow: 0 0 0 5px #66bb6a, var(--shadow);
+}
+
+.g-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.g-empty-frame {
+  width: min(50vw, 240px);
+  height: min(50vw, 240px);
+}
+
+.g-empty-row {
+  display: flex;
+  gap: 24px;
+}
+
+.d-big-go {
+  --b: 120px;
+  border-radius: 32px;
+}
+
+/* ---- landscape: tools | paper | side ------------------------------------------- */
+
+@media (orientation: landscape) {
+  .game-draw {
+    --b: clamp(50px, calc((100dvh - 150px) / 8), 80px);
+  }
+
+  .d-home {
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 4px 0 16px;
+  }
+
+  .d-card-face {
+    height: auto;
+    width: 74%;
+    max-width: none;
+    max-height: 80%;
+  }
+
+  .d-studio {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .d-tools {
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .d-side {
+    width: calc(var(--b) * 3 + 36px);
+    justify-content: center;
+  }
+
+  .d-palette,
+  .d-tray,
+  .fd-studio .d-palette,
+  .fd-studio .d-tray {
+    --cols: 3;
+  }
+
+  .d-palette {
+    grid-auto-rows: calc(var(--b) * 1.05);
+  }
+
+  .fd-studio .d-palette,
+  .fd-studio .d-tray {
+    grid-auto-rows: calc(var(--b) * 0.86);
+  }
+
+  .d-card-crayons {
+    right: -10%;
+  }
+
+  .d-brushes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .d-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+  }
+
+  .d-screen .d-fitgrid {
+    margin-left: calc(var(--b) + 12px);
+  }
+}
+
+@media (orientation: landscape) {
+  .cp-studio .d-crayon.rainbow {
+    grid-column: 2;
+  }
+}
