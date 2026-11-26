@@ -78,3 +78,36 @@ All sounds are from [Freesound.org](https://freesound.org) and are released unde
 | egg | [Egg Crack](https://freesound.org/s/150479/) by davdud101 | egg cracking |
 | trophy | [KidApplause](https://freesound.org/s/859076/) by StuffIamStuffIamnot | kids cheering |
 | medal | [KidApplause](https://freesound.org/s/859076/) by StuffIamStuffIamnot | kids cheering |
+| parrot | [Parrots.wav](https://freesound.org/s/187928/) by castle81 | parrots |
+| chick | [Baby Chicks Chirp.boaay](https://freesound.org/s/519193/) by BOAAY | baby chicks |
+| donkey | [Donkey Bray](https://freesound.org/s/560692/) by StarNinjas37 | donkey bray |
+| cricket | [Cricket Chirp](https://freesound.org/s/400663/) by Sojan | cricket chirp |
+| hippo | [Hippopotamus Sounds](https://freesound.org/s/759858/) by cmp1 | hippopotamus |
+| tram | [11-3 Tram bell](https://freesound.org/s/497561/) by 16HPanskaWillheimova_Sara | tram bell |
+| trumpet | [Tada Fanfare A](https://freesound.org/s/397355/) by plasterbrain | ta-da fanfare |
+| guitar | [Guitar Strumming](https://freesound.org/s/188037/) by AntumDeluge | guitar strumming |
+| drum | [drum roll](https://freesound.org/s/197763/) by owowowwo | drum roll |
+| violin | [Marcato Violin 1.wav](https://freesound.org/s/37284/) by KatHakaku | violin |
+| saxophone | [Saxophone 1 - Tenor (unprocessed)](https://freesound.org/s/447842/) by nowherestudios | tenor saxophone |
+| bell | [handbell.wav](https://freesound.org/s/352242/) by dikt | handbell |
+| banjo | [WinBanjo.wav](https://freesound.org/s/521640/) by Fupicat | banjo |
+| accordion | [Instrument_acordian_open.aif](https://freesound.org/s/119542/) by vrodge | accordion |
+| harp | [Good answer harp glissando.wav](https://freesound.org/s/610703/) by oggraphics | harp glissando |
+| sled | [Sleigh_Bells (7-22-12 edit).mp3](https://freesound.org/s/453202/) by jsm1963 | sleigh bells |
+| ufo | [Cartoon - Flying UFO](https://freesound.org/s/454595/) by Breviceps | cartoon UFO |
+| thunder | [thunder](https://freesound.org/s/193170/) by netaj | thunder |
+| ocean | [Ocean Wave](https://freesound.org/s/442944/) by qubodup | ocean wave |
+| fireworks | [fireworks exploding 1.wav](https://freesound.org/s/117616/) by soundmary | fireworks |
+| doorbell | [DoorBell Shortened](https://freesound.org/s/442280/) by jwheeler91 | doorbell |
+| phone | [Phone Ringing Sound.wav](https://freesound.org/s/528111/) by fspera | phone ringing |
+| alarm | [Alarm Clock.wav](https://freesound.org/s/128910/) by ecfike | alarm clock |
+| baby | [babygiggle.mp3](https://freesound.org/s/458645/) by jamesmbock | baby giggle |
+| sneeze | [sneeze.wav](https://freesound.org/s/54505/) by moxobna | sneeze |
+| snore | [Fast Snore .wav](https://freesound.org/s/108519/) by bsmacbride | snoring |
+| balloon | [Balloon pop.wav](https://freesound.org/s/54012/) by Mart1001 | balloon pop |
+| camera | [DSLR Camera Click](https://freesound.org/s/157812/) by akonze | camera click |
+| toilet | [Toilet Flushing](https://freesound.org/s/274448/) by lorenzgillner | toilet flush |
+| kiss | [Cartoon Kiss_cjohnstone.wav](https://freesound.org/s/536335/) by trijohnstone | cartoon kiss |
+| slide | [classic dizzy take slide whistle.wav](https://freesound.org/s/403002/) by martian | slide whistle |
+| boing | [Boing 2](https://freesound.org/s/540790/) by magnuswaker | boing |
+| laugh | [D2_kidslaughing.mp3](https://freesound.org/s/371342/) by Iamgiorgio | kids laughing |

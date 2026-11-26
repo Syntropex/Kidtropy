@@ -58,6 +58,7 @@ export const ITEMS: Item[] = [
   { id: "helicopter", name: "helicopter", emoji: "🚁", themes: ["trucks"], aliases: ["chopper", "copter", "helicopper"], sound: "Whup whup whup!", fact: "Helicopters have spinning blades on top." },
   { id: "rocket", name: "rocket", emoji: "🚀", themes: ["trucks"], aliases: ["rocket ship", "spaceship"], sound: "Three, two, one, blast off!", fact: "Rockets fly all the way to space!" },
   { id: "boat", name: "boat", emoji: "⛵", themes: ["trucks"], aliases: ["sailboat", "ship"], sound: "Splash!", fact: "Boats float on the water." },
+  { id: "tram", name: "trolley", emoji: "🚋", themes: ["trucks"], aliases: ["tram", "streetcar", "trolley car"], sound: "Ding ding!", fact: "A trolley rides on tracks in the city street." },
   { id: "bicycle", name: "bicycle", emoji: "🚲", themes: ["trucks"], aliases: ["bike", "bicycle"], sound: "Ring ring!", fact: "You pedal a bicycle with your feet." },
 
   // ---- Construction --------------------------------------------------------
@@ -108,6 +109,9 @@ export const ITEMS: Item[] = [
   { id: "dolphin", name: "dolphin", emoji: "🐬", themes: ["animals"], aliases: ["dolphins"], sound: "Click click!", fact: "Dolphins jump and play in the ocean." },
   { id: "seal", name: "seal", emoji: "🦭", themes: ["animals"], aliases: ["seals", "sea lion"], sound: "Arf arf!", fact: "Seals clap their flippers." },
   { id: "gorilla", name: "gorilla", emoji: "🦍", themes: ["animals"], aliases: ["gorillas", "ape", "king kong"], sound: "Ooh ooh!", fact: "Gorillas are big and strong, and they love bananas." },
+  { id: "parrot", name: "parrot", emoji: "🦜", themes: ["animals"], aliases: ["parrots", "polly"], sound: "Squawk!", fact: "Parrots can learn to talk!" },
+  { id: "hippo", name: "hippo", emoji: "🦛", themes: ["animals"], aliases: ["hippopotamus", "hippos"], sound: "Grunt grunt!", fact: "Hippos love to stay cool in the water." },
+  { id: "cricket", name: "cricket", emoji: "🦗", themes: ["animals"], aliases: ["crickets", "grasshopper"], sound: "Chirp chirp!", fact: "Crickets sing at night by rubbing their wings." },
   { id: "dog", name: "dog", emoji: "🐶", themes: ["animals", "farm"], aliases: ["doggy", "puppy", "doggie", "dogs"], sound: "Woof woof!", fact: "Dogs wag their tails when they are happy." },
   { id: "cat", name: "cat", emoji: "🐱", themes: ["animals", "farm"], aliases: ["kitty", "kitten", "cats"], sound: "Meow!", fact: "Cats purr when they are happy." },
 
@@ -119,6 +123,8 @@ export const ITEMS: Item[] = [
   { id: "chicken", name: "chicken", emoji: "🐔", themes: ["farm"], aliases: ["hen", "chickens", "chick"], sound: "Cluck cluck!", fact: "Chickens lay eggs." },
   { id: "rooster", name: "rooster", emoji: "🐓", themes: ["farm"], aliases: ["roosters", "chicken"], sound: "Cock-a-doodle-doo!", fact: "Roosters wake up the farm in the morning." },
   { id: "duck", name: "duck", emoji: "🦆", themes: ["farm"], aliases: ["ducks", "ducky", "duckie"], sound: "Quack quack!", fact: "Ducks love to swim in the pond." },
+  { id: "chick", name: "chick", emoji: "🐤", themes: ["farm"], aliases: ["baby chick", "chicks", "chicky"], sound: "Peep peep!", fact: "Baby chicks are fluffy and yellow." },
+  { id: "donkey", name: "donkey", emoji: "🫏", themes: ["farm"], aliases: ["donkeys", "mule"], sound: "Hee-haw!", fact: "Donkeys have big long ears." },
   { id: "goat", name: "goat", emoji: "🐐", themes: ["farm"], aliases: ["goats", "billy goat"], sound: "Maaa!", fact: "Goats love to climb." },
   { id: "turkey", name: "turkey", emoji: "🦃", themes: ["farm"], aliases: ["turkeys"], sound: "Gobble gobble!", fact: "Turkeys have colorful tail feathers." },
   { id: "farmer", name: "farmer", emoji: "🧑‍🌾", themes: ["farm"], aliases: ["farmers", "old macdonald"], fact: "Farmers grow food and take care of animals." },

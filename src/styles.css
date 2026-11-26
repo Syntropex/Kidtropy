@@ -1578,18 +1578,25 @@ a:focus-visible {
 /* ---- Soundboard tabs and notes ------------------------------------------------ */
 
 .sound-tabs {
-  display: flex;
-  gap: clamp(4px, 1.5vw, 10px);
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 6px 10px;
   justify-content: center;
-  flex-wrap: wrap;
   width: 100%;
 }
 
+@media (min-width: 620px) {
+  .sound-tabs {
+    grid-auto-flow: column;
+    grid-template-columns: none;
+  }
+}
+
 .sound-tab {
-  width: clamp(46px, 13vw, 64px);
-  height: clamp(46px, 13vw, 64px);
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  font-size: clamp(26px, 7.5vw, 36px);
+  font-size: 34px;
   background: rgba(255, 255, 255, 0.55);
   box-shadow: var(--shadow);
   border: 4px solid transparent;

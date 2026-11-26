@@ -5,9 +5,10 @@
 import { abcPairs } from "../data/abc";
 import { EXTRAS } from "../data/items";
 import { GAMES } from "../games/index";
+import { EXTRA_TABS, SOUND_EXTRAS } from "../data/soundboard";
 import { LESSONS, SKILLS, SPEAK_AS, TOOLS } from "../learn/registry";
 import { learnLines } from "../learn/say";
-import { allLines as gameLines, splitLine } from "./lines";
+import { allLines as gameLines, line, splitLine } from "./lines";
 
 export function everySentence(): string[] {
   const raw = [...gameLines(EXTRAS, abcPairs()), ...learnLines()];
@@ -15,6 +16,8 @@ export function everySentence(): string[] {
   for (const l of LESSONS) raw.push(...l.lines());
   for (const t of TOOLS) raw.push(...t.lines());
   for (const g of GAMES) raw.push(...(g.lines?.() ?? []));
+  for (const t of EXTRA_TABS) raw.push(t.say);
+  for (const i of SOUND_EXTRAS) raw.push(line.name(i));
   const out = new Set<string>();
   for (const l of raw) for (const p of splitLine(l)) if ("say" in p) out.add(p.say);
   return [...out];

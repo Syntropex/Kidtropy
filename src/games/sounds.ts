@@ -8,13 +8,29 @@ import { loadBuffer } from "../lib/audio";
 import { speak } from "../lib/speech";
 import { settings } from "../lib/store";
 import { bounce, h, icon, pic } from "../lib/ui";
+import { EXTRA_TABS } from "../data/soundboard";
 import { hasRealSound, line, SAY } from "../voice/lines";
 import type { Game } from "./types";
 
 const TAB_ORDER: Theme[] = ["farm", "animals", "dinos", "trucks", "construction", "racing"];
 
-function itemsIn(theme: Theme): Item[] {
-  return ITEMS.filter((i) => hasRealSound(i) && i.themes.includes(theme));
+interface Tab {
+  id: string;
+  label: string;
+  icon: string;
+  color: string;
+  say: string;
+  items: Item[];
+}
+
+/** Catalog themes first, then instruments and fun sounds. Only buttons with a real recording. */
+export function soundTabs(): Tab[] {
+  const themeTabs: Tab[] = TAB_ORDER.map((id) => {
+    const t = THEMES.find((x) => x.id === id)!;
+    return { id, label: t.label, icon: t.icon, color: t.color, say: line.theme(id, true), items: ITEMS.filter((i) => hasRealSound(i) && i.themes.includes(id)) };
+  });
+  const extra: Tab[] = EXTRA_TABS.map((t) => ({ ...t, items: t.items.filter(hasRealSound) }));
+  return [...themeTabs, ...extra].filter((t) => t.items.length > 0);
 }
 
 export const sounds: Game = {
@@ -24,9 +40,9 @@ export const sounds: Game = {
   color: "#66bb6a",
   start(scene) {
     const { root } = scene;
-    const tabs = TAB_ORDER.map((id) => THEMES.find((t) => t.id === id)!).filter((t) => itemsIn(t.id).length > 0);
+    const tabs = soundTabs();
     // Start on the grown-up's favorite theme if there is one.
-    let current: Theme = tabs.find((t) => settings.themes.includes(t.id))?.id ?? tabs[0].id;
+    let current = tabs.find((t) => settings.themes.includes(t.id as Theme))?.id ?? tabs[0].id;
 
     const tabRow = h("div", { class: "sound-tabs", role: "tablist" });
     const board = h("div", { class: "sound-board" });
@@ -48,7 +64,7 @@ export const sounds: Game = {
                 current = t.id;
                 drawTabs();
                 fill();
-                void speak(line.theme(t.id, true));
+                void speak(t.say);
               },
             },
             icon(t.icon),
@@ -58,7 +74,7 @@ export const sounds: Game = {
     }
 
     function fill() {
-      const items = itemsIn(current);
+      const items = tabs.find((t) => t.id === current)!.items;
       // Warm up the sounds so the first tap is instant.
       for (const i of items) void loadBuffer(`/sounds/${i.id}.mp3`);
       board.replaceChildren(
