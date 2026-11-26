@@ -565,11 +565,19 @@ body:has(.game-draw) {
   justify-content: center;
 }
 
+.d-confirm .d-btn {
+  background: #f4f6fb;
+}
+
 .d-yes {
   box-shadow: 0 0 0 5px #66bb6a, var(--shadow);
 }
 
-.d-confirm.danger .d-yes {
+.d-confirm.danger .d-confirm .d-btn {
+  background: #f4f6fb;
+}
+
+.d-yes {
   box-shadow: 0 0 0 5px #ff8a80, var(--shadow);
 }
 

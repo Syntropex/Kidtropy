@@ -263,35 +263,26 @@ class Painter {
 
   glitter(ctx: CanvasRenderingContext2D, op: LineOp, st: LineState, A: { x: number; y: number }, B: { x: number; y: number }, w: number, first: boolean) {
     const len = Math.hypot(B.x - A.x, B.y - A.y);
-    // A soft trail of glitter glue under the sparkles.
-    ctx.globalAlpha = 0.28;
-    ctx.strokeStyle = ctx.fillStyle = op.c;
-    ctx.lineCap = "round";
-    ctx.lineWidth = w * 0.55;
-    ctx.beginPath();
-    ctx.moveTo(A.x, A.y);
-    ctx.lineTo(B.x + (first ? 0.01 : 0), B.y);
-    ctx.stroke();
-    const gap = Math.max(2, w * 0.16);
+    const gap = Math.max(2, w * 0.13);
     st.acc += len;
     if (first) st.acc = gap;
-    const colors = [op.c, shade(op.c, 0.75), "#ffffff", "#ffd740", lighten(op.c)];
+    const colors = [op.c, shade(op.c, 0.75), lighten(op.c), "#ffc928", op.c];
     while (st.acc >= gap) {
       st.acc -= gap;
       const f = len ? 1 - st.acc / len : 0;
       const x = A.x + (B.x - A.x) * f;
       const y = A.y + (B.y - A.y) * f;
-      for (let k = 0; k < 2; k++) {
+      for (let k = 0; k < 3; k++) {
         const a = st.rnd() * Math.PI * 2;
-        const rr = Math.sqrt(st.rnd()) * w * 0.55;
+        const rr = Math.sqrt(st.rnd()) * w * (k === 2 ? 0.35 : 0.55);
         const px = x + Math.cos(a) * rr;
         const py = y + Math.sin(a) * rr;
         const v = st.rnd();
         ctx.globalAlpha = 0.75 + st.rnd() * 0.25;
         ctx.fillStyle = colors[v < 0.42 ? 0 : v < 0.58 ? 1 : v < 0.74 ? 2 : v < 0.87 ? 3 : 4];
-        if (st.rnd() < 0.09) {
+        if (st.rnd() < 0.06) {
           ctx.globalAlpha = 1;
-          ctx.fillStyle = st.rnd() < 0.5 ? "#ffffff" : "#fff59d";
+          ctx.fillStyle = st.rnd() < 0.6 ? "#ffc928" : lighten(op.c);
           sparkleStar(ctx, px, py, w * (0.28 + st.rnd() * 0.2));
         } else {
           ctx.beginPath();
