@@ -583,6 +583,9 @@ export function freeDraw(root: HTMLElement, o: FreeOpts) {
     const img = loaded.get(stampKey);
     if (!def || !img) {
       void ensureStamp(stampKey);
+  // Warm up the stamp pictures so the first stamp lands right away.
+  const warm = window.setTimeout(() => STAMPS.forEach((st) => void ensureStamp(st.key)), 900);
+  signal.addEventListener("abort", () => clearTimeout(warm));
       return;
     }
     const op: StampOp = { t: "stamp", k: stampKey, x, y, s: STAMP_SIZE[pal.size()], rot: (Math.random() - 0.5) * 0.35 };
@@ -746,6 +749,9 @@ export function freeDraw(root: HTMLElement, o: FreeOpts) {
   setTool(tool, false);
   updateFaces();
   void ensureStamp(stampKey);
+  // Warm up the stamp pictures so the first stamp lands right away.
+  const warm = window.setTimeout(() => STAMPS.forEach((st) => void ensureStamp(st.key)), 900);
+  signal.addEventListener("abort", () => clearTimeout(warm));
 
   signal.addEventListener("abort", () => {
     ro.disconnect();

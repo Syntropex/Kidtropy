@@ -326,13 +326,17 @@ export function fitSquares(grid: HTMLElement, n: number, signal: AbortSignal, ga
   const fit = () => {
     const r = grid.getBoundingClientRect();
     if (!r.width || !r.height) return;
-    let best = 0;
+    const options: { cell: number; empty: number }[] = [];
     for (let cols = 1; cols <= n; cols++) {
       const rows = Math.ceil(n / cols);
-      const cell = Math.min((r.width - (cols - 1) * gap) / cols, (r.height - (rows - 1) * gap) / rows, max);
-      if (cell > best) best = cell;
+      const cell = Math.min((r.width - (cols - 1) * gap) / cols, (r.height - 16 - (rows - 1) * gap) / rows, max);
+      options.push({ cell, empty: cols * rows - n });
     }
-    grid.style.setProperty("--cell", `${Math.floor(best)}px`);
+    const top = Math.max(...options.map((o) => o.cell));
+    // Nearly as big but with no lonely picture on the last row? Prefer that.
+    const pickd = options.filter((o) => o.cell >= top * 0.94).sort((x, y) => x.empty - y.empty || y.cell - x.cell)[0];
+    grid.style.setProperty("--cell", `${Math.floor(pickd.cell)}px`);
+    grid.style.setProperty("--cols", String(options.indexOf(pickd) + 1));
     grid.style.setProperty("--gap", `${gap}px`);
   };
   const ro = new ResizeObserver(fit);

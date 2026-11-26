@@ -91,12 +91,13 @@ body:has(.game-draw) {
 .d-fitgrid {
   flex: 1;
   min-height: 0;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), var(--cell, 120px));
+  grid-auto-rows: var(--cell, 120px);
   align-content: center;
   justify-content: center;
   gap: var(--gap, 12px);
-  padding-bottom: 8px;
+  padding: 6px 0 8px;
 }
 
 .d-fitgrid > * {
@@ -643,12 +644,15 @@ body:has(.game-draw) {
 }
 
 .g-view .d-btn {
-  --b: 80px;
+  --b: min(80px, calc((100vw - 32px - 3 * 12px) / 4));
 }
 
 .g-view-row {
-  gap: 14px;
-  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.g-view-row .d-btn:last-child {
+  margin-left: 12px;
 }
 
 .g-view .d-go {
@@ -754,5 +758,44 @@ body:has(.game-draw) {
 @media (orientation: landscape) {
   .cp-studio .d-crayon.rainbow {
     grid-column: 2;
+  }
+}
+
+/* Short landscape screens (phones on their side): brushes beside the crayons. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .game-draw {
+    --b: clamp(44px, calc((100dvh - 110px) / 5), 64px);
+  }
+
+  .d-side {
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .d-brushes {
+    grid-template-columns: repeat(2, var(--b));
+  }
+
+  .d-palette,
+  .d-tray,
+  .fd-studio .d-palette,
+  .fd-studio .d-tray {
+    --cols: 4;
+    width: calc(var(--b) * 4 + 34px);
+    grid-auto-rows: calc(var(--b) * 0.8);
+  }
+
+  .cp-studio .d-palette {
+    grid-auto-rows: calc(var(--b) * 1.05);
+  }
+
+  .cp-studio .d-crayon.rainbow {
+    grid-column: auto;
+  }
+
+  .d-home .d-card-face {
+    width: auto;
+    height: 80%;
   }
 }

@@ -23,7 +23,7 @@ function fresh(make: () => Question, last?: Question): Question {
  * In practice mode, wrong answers wiggle and the child tries again.
  * In quiz mode, a wrong answer shows the right one and moves on.
  */
-export function ask(scene: Scene, host: HTMLElement, q: Question, mode: Mode, skillId?: string): Promise<boolean> {
+export function ask(scene: Scene, host: HTMLElement, q: Question, mode: Mode, skillId?: string, preface = ""): Promise<boolean> {
   return new Promise((resolve) => {
     const n = q.choices.length;
     const prompt = h("button", { class: "prompt-btn", "aria-label": "Hear it again", onclick: () => speak(q.prompt) }, icon("🔊"));
@@ -72,7 +72,7 @@ export function ask(scene: Scene, host: HTMLElement, q: Question, mode: Mode, sk
     });
     grid.append(...buttons);
     host.replaceChildren(h("div", { class: "q-wrap" }, prompt, q.show ? h("div", { class: "q-show" }, q.show()) : "", grid));
-    void speak(q.prompt);
+    void speak(`${preface} ${q.prompt}`);
   });
 }
 
@@ -84,12 +84,13 @@ function center(el: Element) {
 export async function runPractice(scene: Scene, skill: Skill) {
   const host = h("div", { class: "q-host" });
   scene.root.replaceChildren(host);
-  await speak(skill.intro);
   let last: Question | undefined;
+  let preface = skill.intro;
   while (scene.alive()) {
     const q = fresh(() => skill.make(), last);
     last = q;
-    await ask(scene, host, q, "practice", skill.id);
+    await ask(scene, host, q, "practice", skill.id, preface);
+    preface = "";
     await wait(500);
   }
 }
@@ -98,14 +99,13 @@ export async function runQuiz(scene: Scene, skill: Skill, again: () => void) {
   const dots = h("div", { class: "quiz-dots", "aria-hidden": "true" }, ...Array.from({ length: QUIZ_LENGTH }, () => h("i")));
   const host = h("div", { class: "q-host" });
   scene.root.replaceChildren(h("div", { class: "quiz-wrap" }, dots, host));
-  await speak(LEARN_SAY.quizStart);
   let score = 0;
   let last: Question | undefined;
   for (let i = 0; i < QUIZ_LENGTH && scene.alive(); i++) {
     dots.children[i]?.classList.add("now");
     const q = fresh(() => skill.make(), last);
     last = q;
-    const ok = await ask(scene, host, q, "quiz", skill.id);
+    const ok = await ask(scene, host, q, "quiz", skill.id, i === 0 ? LEARN_SAY.quizStart : "");
     if (!scene.alive()) return;
     if (ok) score++;
     dots.children[i]?.classList.replace("now", ok ? "ok" : "miss");
