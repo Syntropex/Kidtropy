@@ -1,11 +1,12 @@
 /** Every skill, lesson and tool, by grade. */
+import { FRENCH_LESSONS, FRENCH_SKILLS } from "./french";
 import { MATH_LESSONS, MATH_SKILLS } from "./math";
 import { READING_LESSONS, READING_SKILLS, READING_SPEAK_AS } from "./reading";
 import { TOOLS } from "./tools/index";
 import type { Grade, Lesson, Skill, SpeakAs, Tool } from "./types";
 
-export const SKILLS: Skill[] = [...MATH_SKILLS, ...READING_SKILLS];
-export const LESSONS: Lesson[] = [...MATH_LESSONS, ...READING_LESSONS];
+export const SKILLS: Skill[] = [...MATH_SKILLS, ...READING_SKILLS, ...FRENCH_SKILLS];
+export const LESSONS: Lesson[] = [...MATH_LESSONS, ...READING_LESSONS, ...FRENCH_LESSONS];
 export { TOOLS };
 export const SPEAK_AS: SpeakAs = { ...READING_SPEAK_AS };
 

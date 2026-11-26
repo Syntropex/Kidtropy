@@ -19,7 +19,11 @@ export function everySentence(): string[] {
   for (const t of EXTRA_TABS) raw.push(t.say);
   for (const i of SOUND_EXTRAS) raw.push(line.name(i));
   const out = new Set<string>();
-  for (const l of raw) for (const p of splitLine(l)) if ("say" in p) out.add(p.say);
+  for (const l of raw)
+    for (const p of splitLine(l)) {
+      if ("say" in p) out.add(p.say);
+      else if ("fr" in p) out.add(`fr:${p.fr}`); // French voice; see scripts/voice/generate.py
+    }
   return [...out];
 }
 

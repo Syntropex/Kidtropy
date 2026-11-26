@@ -83,6 +83,10 @@ export async function speak(text: string, opts: { rate?: number; pitch?: number;
   // Start every download at once so sentences play back to back.
   const loads = parts.map((p) => {
     if ("snd" in p) return loadBuffer(`/sounds/${p.snd}.mp3`);
+    if ("fr" in p) {
+      const fid = clipId(`fr:${p.fr}`);
+      return CLIPS.has(fid) ? loadBuffer(`/voice/${fid}.mp3`) : Promise.resolve(null);
+    }
     const cid = clipId(p.say);
     return clips && CLIPS.has(cid) ? loadBuffer(`/voice/${cid}.mp3`) : Promise.resolve(null);
   });
@@ -92,18 +96,19 @@ export async function speak(text: string, opts: { rate?: number; pitch?: number;
     const p = parts[i];
     if (buf) await playBuffer(buf, "snd" in p ? 0.8 : 1);
     else if ("say" in p) await deviceSpeak(p.say, opts);
+    else if ("fr" in p) await deviceSpeak(p.fr, opts, "fr");
     if (id !== speakId) return;
   }
 }
 
 /** Speak with the device's own text-to-speech voice. */
-function deviceSpeak(text: string, opts: { rate?: number; pitch?: number }): Promise<void> {
+function deviceSpeak(text: string, opts: { rate?: number; pitch?: number }, lang: "en" | "fr" = "en"): Promise<void> {
   if (!synth) return Promise.resolve();
   return new Promise((resolve) => {
     const u = new SpeechSynthesisUtterance(text);
-    const v = pickVoice();
+    const v = lang === "fr" ? (synth.getVoices().find((x) => x.lang.toLowerCase().startsWith("fr")) ?? null) : pickVoice();
     if (v) u.voice = v;
-    u.lang = v?.lang ?? "en-US";
+    u.lang = v?.lang ?? (lang === "fr" ? "fr-FR" : "en-US");
     u.rate = (opts.rate ?? 1) * settings.rate;
     u.pitch = opts.pitch ?? 1.1;
     let done = false;

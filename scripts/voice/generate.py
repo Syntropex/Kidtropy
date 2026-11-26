@@ -19,6 +19,8 @@ MODEL_URL = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model
 FILES = ["kokoro-v1.0.onnx", "voices-v1.0.bin"]
 
 VOICE = os.environ.get("KIDTROPY_VOICE", "af_heart")  # warm, friendly US English
+FR_VOICE = os.environ.get("KIDTROPY_FR_VOICE", "ff_siwis")  # French; sentences prefixed "fr:"
+FR_SPEED = 0.95
 SPEED = float(os.environ.get("KIDTROPY_SPEED", "0.9"))  # a little slower for little ears
 # Slowing down one- or two-word phrases makes Kokoro garble them ("Six!"), so those use normal speed.
 SHORT_SPEED = 1.0
@@ -85,7 +87,12 @@ def main():
             for n, (cid, text) in enumerate(todo, 1):
                 text = "/" + phonemes[cid] if cid in phonemes else SPEAK_AS.get(text, text)
                 fixes = [f for f in PHONEME_FIXES if f[0].search(text)]
-                if text.startswith("/"):
+                if text.startswith("fr:"):
+                    fr = text[3:].strip()
+                    if not fr.endswith((".", "!", "?")):
+                        fr += "."
+                    samples, sr = k.create(fr, voice=FR_VOICE, speed=FR_SPEED, lang="fr-fr", trim=False)
+                elif text.startswith("/"):
                     samples, sr = k.create(text[1:], voice=VOICE, speed=speed_for(text), is_phonemes=True)
                 elif fixes:
                     ph = k.tokenizer.phonemize(text, "en-us")

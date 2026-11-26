@@ -19,6 +19,7 @@ Pick a grade at the top of the home screen. Each grade has five sections:
 | ✅ | **Quiz** | 10 questions per skill, scored with up to 3 stars. Scores appear in the grown-ups progress report. |
 
 **Math:** numbers, counting, shapes, colors, big/small, patterns (Pre-K) · numbers to 20, ten frames, more/fewer, bigger number, adding and taking away within 10, 3D shapes (K) · adding and subtracting within 20, make 10, counting to 120, tens and ones, comparing numbers, telling time, longer/shorter (1st).
+**French** (for English speakers, Pre-K and K): hello and goodbye, animals, colors, counting to 5 and 10, vehicles, food, body and family. An English narrator explains and a French voice says the words: "In French, cat is… *le chat*. Say it with me!"
 **Reading:** letters (Pre-K) · letter sounds, upper/lowercase, rhymes, sight words, reading short words (K) · sh/ch/th, sight words, word families, reading sentences (1st).
 
 ## The games

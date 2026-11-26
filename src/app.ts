@@ -148,7 +148,7 @@ const SECTIONS: { id: Section; label: string; icon: string; color: string; say: 
   { id: "tools", label: "Tools", icon: "🧰", color: "#26a69a", say: LEARN_SAY.toolsSection },
   { id: "quiz", label: "Quiz", icon: "✅", color: "#ffa726", say: LEARN_SAY.quizSection },
 ];
-const AREA_COLORS: Record<string, string> = { math: "#29b6f6", reading: "#ff7043", world: "#66bb6a" };
+const AREA_COLORS: Record<string, string> = { math: "#29b6f6", reading: "#ff7043", world: "#66bb6a", french: "#3f51b5" };
 
 function currentSection(): Section {
   try {
@@ -178,6 +178,25 @@ function tile(href: string, title: string, glyph: string, color: string, i: numb
   );
 }
 
+const AREA_HEADS: { id: string; label: string; icon: string }[] = [
+  { id: "math", label: "Math", icon: "🔢" },
+  { id: "reading", label: "Reading", icon: "📖" },
+  { id: "world", label: "World", icon: "🌎" },
+  { id: "french", label: "French", icon: "🥐" },
+];
+
+/** Tiles grouped under small subject headings (Math, Reading, French). */
+function byArea<T extends { area: string }>(things: T[], make: (t: T, i: number) => HTMLElement): HTMLElement {
+  const wrap = h("div", { class: "area-groups" });
+  let i = 0;
+  for (const a of AREA_HEADS) {
+    const mine = things.filter((t) => (a.id === "math" ? t.area === "math" || t.area === "world" : t.area === a.id));
+    if (a.id === "world" || !mine.length) continue;
+    wrap.append(h("h3", { class: "area-head", style: `--c:${AREA_COLORS[a.id]}` }, icon(a.icon), a.label), h("div", { class: "game-grid" }, ...mine.map((t) => make(t, i++))));
+  }
+  return wrap;
+}
+
 function sectionTiles(section: Section, g: Grade): HTMLElement {
   const grid = (...tiles: HTMLElement[]) =>
     tiles.length ? h("div", { class: "game-grid" }, ...tiles) : h("p", { class: "empty-section" }, "Coming soon!");
@@ -185,20 +204,18 @@ function sectionTiles(section: Section, g: Grade): HTMLElement {
     case "play":
       return grid(...GAMES.map((x, i) => tile(`#/${x.id}`, x.title, x.icon, x.color, i)));
     case "practice":
-      return grid(...skillsFor(g).map((s, i) => tile(`#/skill/${s.id}`, s.title, s.icon, AREA_COLORS[s.area], i)));
+      return byArea(skillsFor(g), (s, i) => tile(`#/skill/${s.id}`, s.title, s.icon, AREA_COLORS[s.area], i));
     case "learn":
-      return grid(...lessonsFor(g).map((l, i) => tile(`#/lesson/${l.id}`, l.title, l.icon, "#7e57c2", i)));
+      return byArea(lessonsFor(g), (l, i) => tile(`#/lesson/${l.id}`, l.title, l.icon, l.area === "french" ? AREA_COLORS.french : "#7e57c2", i));
     case "tools":
       return grid(...toolsFor(g).map((t, i) => tile(`#/tool/${t.id}`, t.title, t.icon, "#26a69a", i)));
     case "quiz":
-      return grid(
-        ...skillsFor(g).map((s, i) => {
+      return byArea(skillsFor(g), (s, i) => {
           const r = record(s.id);
           const stars = r.quizzes ? starsFor(r.best) : 0;
           const badge = h("span", { class: "tile-stars", "aria-label": `${stars} stars` }, ...[0, 1, 2].map((k) => h("i", { class: k < stars ? "on" : "" })));
           return tile(`#/quiz/${s.id}`, s.title, s.icon, AREA_COLORS[s.area], i, badge);
-        }),
-      );
+        });
   }
 }
 

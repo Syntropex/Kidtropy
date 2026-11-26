@@ -612,3 +612,26 @@
 .score.low {
   background: #ffe0b2;
 }
+
+/* ---- Subject headings on the home screen -------------------------------------- */
+
+.area-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.area-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 4px 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.area-head .ico {
+  font-size: 30px;
+}

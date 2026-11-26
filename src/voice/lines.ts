@@ -153,15 +153,24 @@ export function firstLetter(item: Item) {
 // ---------------------------------------------------------------------------
 // Sentence splitting, shared by the player and the generator.
 
-export type Part = { say: string } | { snd: string };
+/** say = English sentence, fr = French word or phrase (French voice), snd = real recorded sound. */
+export type Part = { say: string } | { fr: string } | { snd: string };
 
-/** "Yes! It's a cow! [[snd:cow]] Cows give milk." -> sentences and sounds. */
+/**
+ * "Yes! It's a cow! [[snd:cow]] Cows give milk." -> sentences and sounds.
+ * "[[fr:le chat]]" is spoken by the French voice.
+ */
 export function splitLine(text: string): Part[] {
   const parts: Part[] = [];
-  for (const chunk of text.split(/(\[\[snd:[a-z0-9-]+\]\])/)) {
+  for (const chunk of text.split(/(\[\[(?:snd|fr):[^\]]+\]\])/)) {
     const m = chunk.match(/^\[\[snd:([a-z0-9-]+)\]\]$/);
     if (m) {
       parts.push({ snd: m[1] });
+      continue;
+    }
+    const f = chunk.match(/^\[\[fr:([^\]]+)\]\]$/);
+    if (f) {
+      parts.push({ fr: f[1].trim() });
       continue;
     }
     for (const s of chunk.split(/(?<=[.!?])\s+/)) {

@@ -14,7 +14,7 @@ export const GRADES: { id: Grade; label: string; short: string; color: string; s
   { id: "g1", label: "1st Grade", short: "1st", color: "#26a69a", say: "First grade!" },
 ];
 
-export type Area = "math" | "reading" | "world";
+export type Area = "math" | "reading" | "world" | "french";
 
 /** One answer button. */
 export interface Choice {
