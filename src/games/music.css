@@ -84,24 +84,29 @@
 /* ---- Mode picker --------------------------------------------------------------- */
 
 .mx-modes {
-  --gap: clamp(14px, 3vw, 26px);
+  --gap: clamp(12px, 3vw, 24px);
   --cols: 2;
-  --rows: 2;
-  --cell: min((100vw - 32px - var(--gap)) / 2, (100dvh - 130px - var(--gap)) / 2, 330px);
+  --cell: min((100vw - 32px - var(--gap)) / 2, (100dvh - 120px - 3 * var(--gap)) / 4, 300px);
   flex: 1;
-  display: grid;
-  grid-template-columns: repeat(var(--cols), var(--cell));
-  grid-auto-rows: var(--cell);
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--gap);
   align-content: center;
   justify-content: center;
+  margin: 0 auto;
+  max-width: calc(var(--cols) * var(--cell) + (var(--cols) - 1) * var(--gap) + 1px);
 }
 
 @media (orientation: landscape) {
   .mx-modes {
     --cols: 4;
-    --cell: min((100vw - 40px - 3 * var(--gap)) / 4, 100dvh - 150px, 300px);
+    --cell: min((100vw - 40px - 3 * var(--gap)) / 4, (100dvh - 130px - var(--gap)) / 2, 280px);
   }
+}
+
+.mx-modes > .mx-mode {
+  width: var(--cell);
+  height: var(--cell);
 }
 
 .mx-mode {
@@ -112,8 +117,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4%;
-  padding: 10%;
+  gap: calc(var(--cell, 200px) * 0.04);
+  padding: calc(var(--cell, 200px) * 0.1);
   overflow: hidden;
 }
 
@@ -655,5 +660,485 @@
 @keyframes mx-tick {
   35% {
     transform: scale(1.12);
+  }
+}
+
+/* ---- Instruments, song pages ---------------------------------------------------- */
+
+.mx-inst {
+  width: 58px;
+  height: 58px;
+  padding: 6px;
+}
+
+.mx-inst .mx-svg {
+  width: 46px;
+  height: 46px;
+}
+
+.mx-inst.on {
+  box-shadow: 0 0 0 5px #ffeb3b, var(--shadow);
+  transform: scale(1.08);
+}
+
+.mx-dots {
+  display: flex;
+  gap: 10px;
+}
+
+.mx-dots i {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.mx-dots i.on {
+  background: #fff;
+  box-shadow: 0 0 0 3px #ffd54f;
+}
+
+.mx-black img {
+  filter: brightness(0.38) contrast(1.2);
+}
+
+.mx-tile .pic.art svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Parrot ---------------------------------------------------------------------- */
+
+.mx-parrot-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 12px;
+}
+
+@media (orientation: landscape) {
+  .mx-parrot-stage {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+  }
+  .mx-parrot-stage .mx-mic-note {
+    flex-basis: 100%;
+  }
+}
+
+.mx-parrot-perch {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.mx-parrot {
+  width: min(62vw, 34vh, 340px);
+  aspect-ratio: 1;
+  transform-origin: 50% 90%;
+}
+
+.mx-parrot svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.mx-parrot .beak-bottom {
+  transform-box: fill-box;
+  transform-origin: 0% 0%;
+}
+
+.mx-parrot.talking,
+.mx-voice.talking {
+  animation: mx-talk 0.24s ease-in-out infinite alternate;
+}
+
+.mx-parrot.talking .beak-bottom {
+  animation: mx-beak 0.16s ease-in-out infinite alternate;
+}
+
+.mx-parrot.listening {
+  animation: mx-listen 1s ease-in-out infinite;
+}
+
+.mx-parrot.sad {
+  filter: saturate(0.5);
+  transform: rotate(-6deg);
+}
+
+@keyframes mx-talk {
+  to {
+    transform: rotate(-4deg) scale(1.05);
+  }
+}
+
+@keyframes mx-beak {
+  to {
+    transform: rotate(28deg);
+  }
+}
+
+@keyframes mx-listen {
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+.mx-parrot-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.mx-mic {
+  --lvl: 0;
+  position: relative;
+  width: min(36vw, 22vh, 170px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff8a80, #e53935 70%);
+  box-shadow: 0 0 0 calc(var(--lvl) * 26px) rgba(255, 82, 82, 0.35), 0 8px 0 #b71c1c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.08s;
+}
+
+.mx-mic:active {
+  transform: translateY(5px);
+}
+
+.mx-mic > .ico {
+  width: 58%;
+  height: 58%;
+  pointer-events: none;
+}
+
+.mx-mic:not(.rec) {
+  animation: pulse 1.6s infinite;
+}
+
+.mx-rec-ring {
+  position: absolute;
+  inset: -12px;
+  pointer-events: none;
+  display: none;
+}
+
+.mx-rec-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.mx-rec-ring circle {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+
+.mx-mic.rec .mx-rec-ring {
+  display: block;
+}
+
+.mx-mic.rec .mx-rec-ring circle {
+  animation: mx-ring 3s linear forwards;
+}
+
+@keyframes mx-ring {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.mx-mic-off {
+  position: absolute;
+  right: -4%;
+  bottom: -4%;
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow);
+  padding: 8%;
+}
+
+.mx-mic-off .ico {
+  width: 100%;
+  height: 100%;
+}
+
+.mx-voices {
+  display: flex;
+  gap: 16px;
+}
+
+.mx-voice {
+  width: min(24vw, 13vh, 110px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mx-voice .pic,
+.mx-voice .ico {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mx-mic-note {
+  margin: 0 8px;
+}
+
+/* ---- Beat maker ------------------------------------------------------------------- */
+
+.mx-seq {
+  --gap: clamp(5px, 1.2vmin, 10px);
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--rows), minmax(0, 1fr));
+  grid-template-rows: 56px repeat(var(--steps), minmax(0, 1fr));
+  gap: var(--gap);
+  touch-action: none;
+  padding-bottom: 8px;
+}
+
+.mx-seq > * {
+  grid-row: var(--pr);
+  grid-column: var(--pc);
+  min-height: 0;
+}
+
+@media (orientation: landscape) {
+  .mx-seq {
+    grid-template-columns: clamp(56px, 9vh, 84px) repeat(var(--steps), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+  }
+  .mx-seq > * {
+    grid-row: var(--lr);
+    grid-column: var(--lc);
+  }
+}
+
+.mx-seq-head {
+  border-radius: 16px;
+  background: var(--c);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.mx-seq-head svg,
+.mx-seq-head .pic {
+  height: 100%;
+  max-width: 100%;
+  pointer-events: none;
+}
+
+.mx-seq-head .pic {
+  aspect-ratio: 1;
+}
+
+.mx-cell {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.08);
+  transition: background 0.1s;
+  position: relative;
+}
+
+.mx-cell.alt {
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.mx-cell.on {
+  background: var(--c);
+  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.2), 0 3px 0 rgba(0, 0, 0, 0.15);
+}
+
+.mx-cell.on::after {
+  content: "";
+  position: absolute;
+  inset: 30%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.mx-cell.now {
+  outline: 4px solid #fff;
+  outline-offset: 1px;
+}
+
+.mx-cell.on.now {
+  filter: brightness(1.2);
+  transform: scale(1.08);
+}
+
+.mx-beat-btn.pulse-me {
+  animation: pulse 1.4s infinite;
+}
+
+/* ---- Dance party --------------------------------------------------------------------- */
+
+.mx-floor {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 60px),
+    linear-gradient(180deg, #311b92, #4a148c 60%, #1a237e);
+  box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.mx-lights i {
+  position: absolute;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 0.4;
+  transition: opacity 0.15s, background 0.15s;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.mx-lights i:nth-child(1) { left: -20%; top: -20%; }
+.mx-lights i:nth-child(2) { right: -20%; top: -10%; }
+.mx-lights i:nth-child(3) { left: 10%; bottom: -30%; }
+.mx-lights i:nth-child(4) { right: 0; bottom: -25%; }
+
+.mx-ball {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: min(30vw, 18vh, 170px);
+  aspect-ratio: 1;
+  margin-left: calc(min(30vw, 18vh, 170px) / -2);
+  transform-origin: 50% 0;
+}
+
+.mx-ball svg {
+  width: 100%;
+  height: 100%;
+}
+
+.mx-floor.party .mx-ball {
+  animation: mx-swing 2s ease-in-out infinite alternate;
+}
+
+@keyframes mx-swing {
+  from {
+    transform: rotate(-8deg);
+  }
+  to {
+    transform: rotate(8deg);
+  }
+}
+
+.mx-dancers {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 6px 22px;
+  padding: 0 10px 18px;
+}
+
+.mx-dancer {
+  width: min(36vw, 17vh, 170px);
+  aspect-ratio: 1;
+}
+
+@media (orientation: landscape) {
+  .mx-dancer {
+    width: min(17vw, 30vh, 190px);
+  }
+  .mx-dancers {
+    padding-bottom: 6%;
+  }
+}
+
+.mx-dancer-in {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.3));
+}
+
+.mx-dancer-in .pic {
+  width: 100%;
+  height: 100%;
+}
+
+.mx-dancer-in.hop { animation: mx-hop 0.45s ease-out; }
+.mx-dancer-in.sway-l { animation: mx-sway-l 0.45s ease-in-out; }
+.mx-dancer-in.sway-r { animation: mx-sway-r 0.45s ease-in-out; }
+.mx-dancer-in.spin { animation: mx-spin 0.7s ease-in-out; }
+.mx-dancer-in.bow { animation: mx-bow 1s ease-in-out; }
+
+@keyframes mx-hop {
+  40% { transform: translateY(-28%) scale(1.05, 0.95); }
+  70% { transform: translateY(0) scale(1.08, 0.9); }
+}
+
+@keyframes mx-sway-l {
+  50% { transform: rotate(-14deg) translateX(-8%); }
+}
+
+@keyframes mx-sway-r {
+  50% { transform: rotate(14deg) translateX(8%); }
+}
+
+@keyframes mx-spin {
+  50% { transform: translateY(-20%) rotate(180deg) scale(1.1); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes mx-bow {
+  40%,
+  60% { transform: rotate(18deg) translateY(10%); }
+}
+
+.mx-progress-pic.mx-svg svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Landscape sizes for the parrot screen (after the base rules so they win). */
+@media (orientation: landscape) {
+  .mx-parrot {
+    width: min(38vw, 58vh, 440px);
+  }
+  .mx-mic {
+    width: min(20vw, 30vh, 200px);
+  }
+  .mx-voice {
+    width: min(12vw, 18vh, 130px);
   }
 }

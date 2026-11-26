@@ -14,6 +14,8 @@ export const SCALE_HZ = [523.25, 587.33, 659.25, 698.46, 783.99, 880, 987.77, 10
 export const SCALE_SEMIS = [0, 2, 4, 5, 7, 9, 11, 12];
 
 export type Drum = "kick" | "snare" | "hat" | "tom" | "clap" | "crash";
+export type Instrument = "xylophone" | "piano" | "musicbox" | "steeldrum";
+export const INSTRUMENTS: Instrument[] = ["xylophone", "piano", "musicbox", "steeldrum"];
 
 const noiseBuffers = new WeakMap<BaseAudioContext, AudioBuffer>();
 
@@ -104,11 +106,12 @@ export class Mixer {
     return g;
   }
 
-  private osc(type: OscillatorType, freq: number, at: number, stop: number, dest: AudioNode): OscillatorNode {
+  private osc(type: OscillatorType, freq: number, at: number, stop: number, dest: AudioNode | AudioParam): OscillatorNode {
     const o = this.track(this.ctx.createOscillator());
     o.type = type;
     o.frequency.setValueAtTime(freq, at);
-    o.connect(dest);
+    if (dest instanceof AudioParam) o.connect(dest);
+    else o.connect(dest);
     o.start(at);
     o.stop(stop);
     return o;
@@ -235,7 +238,18 @@ export class Mixer {
    * function that fades it out quickly.
    */
   sample(buf: AudioBuffer, rate: number, at = this.now, maxDur = 1.4): () => void {
-    if (this.closed) return () => {};
+    return this.voice(buf, { rate, at, maxDur }).stop;
+  }
+
+  /**
+   * A recorded sound with effects: a pitch (rate) and optionally a robot
+   * (ring-modulated, a little metallic). Returns how long it plays and a stop.
+   */
+  voice(buf: AudioBuffer, opts: { rate?: number; at?: number; maxDur?: number; robot?: boolean } = {}): { stop: () => void; dur: number } {
+    const rate = opts.rate ?? 1;
+    const at = opts.at ?? this.now;
+    const maxDur = opts.maxDur ?? 1.4;
+    if (this.closed) return { stop: () => {}, dur: 0 };
     const { offset, gain } = analyse(buf);
     const s = this.track(this.ctx.createBufferSource());
     s.buffer = buf;
@@ -247,10 +261,27 @@ export class Mixer {
       g.gain.setValueAtTime(gain, at + len - 0.25);
       g.gain.linearRampToValueAtTime(0, at + len);
     }
-    s.connect(g).connect(this.input);
+    if (opts.robot) {
+      // Ring modulation at 50 Hz plus a short metallic echo: a friendly robot.
+      const rm = this.ctx.createGain();
+      rm.gain.value = 0;
+      this.osc("sine", 50, at, at + len + 0.1, rm.gain);
+      const delay = this.ctx.createDelay(0.1);
+      delay.delayTime.value = 0.011;
+      const fb = this.ctx.createGain();
+      fb.gain.value = 0.55;
+      const out = this.ctx.createGain();
+      out.gain.value = 1.6;
+      s.connect(g).connect(rm).connect(out);
+      rm.connect(delay).connect(fb).connect(delay);
+      delay.connect(out);
+      out.connect(this.input);
+    } else {
+      s.connect(g).connect(this.input);
+    }
     s.start(at, offset);
     s.stop(at + len + 0.02);
-    return () => {
+    const stop = () => {
       const t = this.now;
       try {
         g.gain.cancelScheduledValues(t);
@@ -261,6 +292,64 @@ export class Mixer {
         /* already finished */
       }
     };
+    return { stop, dur: len };
+  }
+
+  /** One note on an instrument. */
+  note(inst: Instrument, freq: number, at = this.now, vel = 1) {
+    if (this.closed) return;
+    switch (inst) {
+      case "xylophone":
+        return this.mallet(freq, at, vel);
+      case "piano":
+        return this.partials(freq, at, vel, "sine", [
+          [1, 0.5, 1.8],
+          [2, 0.22, 1.1],
+          [3, 0.1, 0.6],
+          [4, 0.05, 0.35],
+        ], 0.004, 0.04);
+      case "musicbox":
+        return this.partials(freq * 2, at, vel, "sine", [
+          [1, 0.42, 1.5],
+          [5.92, 0.05, 0.12],
+        ], 0.001, 0.03);
+      case "steeldrum": {
+        const f = freq / 2;
+        this.partials(f, at, vel, "sine", [
+          [1, 0.5, 0.8],
+          [2, 0.32, 0.5],
+          [3, 0.12, 0.3],
+          [4.2, 0.05, 0.12],
+        ], 0.003, 0, 1.02);
+        return;
+      }
+    }
+  }
+
+  /** Sine partials [ratio, gain, decay], optionally sliding into pitch from `bend` × freq. */
+  private partials(freq: number, at: number, vel: number, type: OscillatorType, list: [number, number, number][], attack: number, knock: number, bend = 1) {
+    for (const [ratio, gain, decay] of list) {
+      const g = this.env(at, gain * vel, decay, attack);
+      g.connect(this.input);
+      const o = this.osc(type, freq * ratio * bend, at, at + attack + decay + 0.05, g);
+      if (bend !== 1) o.frequency.exponentialRampToValueAtTime(freq * ratio, at + 0.05);
+    }
+    if (knock > 0) {
+      const click = this.env(at, knock * vel, 0.02, 0.001);
+      const lp = this.filter("lowpass", 2500);
+      lp.connect(click).connect(this.input);
+      this.noise(at, 0.04, lp);
+    }
+  }
+
+  /** A round, plucky bass note (for the dance party). */
+  bass(freq: number, at = this.now, vel = 1, dur = 0.28) {
+    if (this.closed) return;
+    const g = this.env(at, 0.55 * vel, dur, 0.005);
+    const lp = this.filter("lowpass", 900);
+    lp.connect(g).connect(this.input);
+    this.osc("triangle", freq, at, at + dur + 0.05, lp);
+    this.osc("sine", freq / 2, at, at + dur + 0.05, lp);
   }
 
   /** How many sounds are still ringing (for tests). */

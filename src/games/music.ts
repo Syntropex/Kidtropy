@@ -1,7 +1,8 @@
 /**
- * Music: a rainbow xylophone, a drum kit with a beat to play along with, an
- * animal piano (the cow goes moo in eight different notes!) and
- * "follow the lights" songs.
+ * Music: a rainbow xylophone (or piano, music box, steel drum), a drum kit
+ * with a beat to play along with, an animal piano (the cow goes moo in eight
+ * different notes!), "follow the lights" songs, a parrot that echoes what you
+ * say in funny voices, a beat maker and a dance party.
  *
  * Everything is synthesized with Web Audio except the animal piano, which
  * pitches the real recordings in public/sounds/. Music plays even when the
@@ -14,11 +15,15 @@ import { speak } from "../lib/speech";
 import { bounce, h, icon, pic, reward } from "../lib/ui";
 import { line } from "../voice/lines";
 import SOUNDS from "../voice/sounds.json";
-import { MUSIC_ART } from "./music-art";
+import { MUSIC_ART, type MusicArt } from "./music-art";
 import { makeBars } from "./music-bars";
+import { danceParty, DANCE_SAY } from "./music-dance";
 import { drums } from "./music-drums";
+import { beatMaker, GRID_SAY } from "./music-grid";
+import type { Kit } from "./music-kit";
+import { parrot, PARROT_SAY } from "./music-parrot";
 import { noteTimes, SONGS, songLength, type Song } from "./music-songs";
-import { makeMixer, SCALE_HZ, SCALE_SEMIS, Ticker } from "./music-synth";
+import { INSTRUMENTS, makeMixer, SCALE_HZ, SCALE_SEMIS, Ticker, type Instrument } from "./music-synth";
 import type { Game } from "./types";
 
 const SAY = {
@@ -34,6 +39,11 @@ const SINGER_ORDER = ["duck", "cow", "dog", "cat", "pig", "sheep", "horse", "car
 /** Recorded sounds that aren't much of a singing voice (crunchy food, prizes). */
 const NOT_SINGERS = new Set(["apple", "carrot", "corn", "egg", "medal", "trophy", "builder", "tire"]);
 const PAGE = 12;
+const SONG_PAGE = 6;
+
+/** The bars' sound, shared by the xylophone and songs (kept while the app is open). */
+let instrument: Instrument = "xylophone";
+const INSTRUMENT_ART: Record<Instrument, MusicArt> = { xylophone: "xylophone", piano: "piano", musicbox: "musicbox", steeldrum: "steeldrum" };
 
 /** The animals and vehicles that can sing on the animal piano. */
 export function singers(): Item[] {
@@ -46,8 +56,12 @@ export function singers(): Item[] {
 const rateFor = (i: number) => Math.pow(2, (SCALE_SEMIS[i] - 5) / 12);
 
 function songPicture(s: Song, cls = ""): HTMLElement {
-  const item = s.picture.item ? byId.get(s.picture.item) : undefined;
-  return item ? pic(item, cls) : h("span", { class: `pic art ${cls}` }, icon(s.picture.emoji ?? "🎵"));
+  const { item: id, emoji, art } = s.picture;
+  const item = id ? byId.get(id) : undefined;
+  const c = `${cls} ${s.picture.cls ?? ""}`;
+  if (item) return pic(item, c);
+  if (art && art in MUSIC_ART) return h("span", { class: `pic art ${c}`, html: MUSIC_ART[art as MusicArt] });
+  return h("span", { class: `pic art ${c}` }, icon(emoji ?? "🎵"));
 }
 
 /** For tests and debugging in dev: what the game is doing right now. */
@@ -93,10 +107,13 @@ export const music: Game = {
     };
     const spacer = () => h("span", { class: "mx-spacer" });
 
-    const arpeggio = (bars = [0, 2, 4, 7], gap = 0.09) => {
+    const arpeggio = (bars = [0, 2, 4, 7], gap = 0.09, inst: Instrument = "xylophone") => {
       if (!mixer) return;
-      bars.forEach((b, k) => mixer.mallet(SCALE_HZ[b], mixer.now + k * gap, 0.8));
+      bars.forEach((b, k) => mixer.note(inst, SCALE_HZ[b], mixer.now + k * gap, 0.8));
     };
+
+    /** Everything a screen in its own file needs. */
+    const kitFor = (mode: string): Kit => ({ mixer, signal: fresh(mode), show, roundBtn, spacer, home: picker, dbg });
 
     // ---- Mode picker -------------------------------------------------------
 
@@ -113,7 +130,10 @@ export const music: Game = {
           preview: () => arpeggio([4, 2, 0], 0.08),
           go: () => animalPick(0, true),
         },
-        { label: "Songs", color: "#ab47bc", content: [h("span", { class: "mx-mode-art", html: MUSIC_ART.songs })], preview: () => arpeggio([0, 0, 4, 4, 5, 5, 4], 0.12), go: () => songPick(true) },
+        { label: "Songs", color: "#ab47bc", content: [h("span", { class: "mx-mode-art", html: MUSIC_ART.songs })], preview: () => arpeggio([0, 0, 4, 4, 5, 5, 4], 0.12), go: () => songPick(0, true) },
+        { label: "Parrot", color: "#26a69a", content: [h("span", { class: "mx-mode-art", html: MUSIC_ART.parrot })], preview: () => {}, go: () => parrot(kitFor("parrot")) },
+        { label: "Beat maker", color: "#5c6bc0", content: [h("span", { class: "mx-mode-art", html: MUSIC_ART.grid })], preview: () => mixer?.drum("kick"), go: () => beatMaker(kitFor("grid")) },
+        { label: "Dance party", color: "#ec407a", content: [h("span", { class: "mx-mode-art", html: MUSIC_ART.disco })], preview: () => {}, go: () => danceParty(kitFor("dance")) },
       ];
       show(
         "mx-picker",
@@ -138,10 +158,23 @@ export const music: Game = {
     function xylophone() {
       const signal = fresh("xylophone");
       const bars = makeBars(signal, (i, at) => {
-        mixer?.mallet(SCALE_HZ[i]);
+        mixer?.note(instrument, SCALE_HZ[i]);
         bars.hit(i, at);
       });
-      show("mx-xylo", [spacer()], bars.el, picker);
+      const choices = INSTRUMENTS.map((inst) => {
+        const b = roundBtn(h("span", { class: "mx-svg", html: MUSIC_ART[INSTRUMENT_ART[inst]] }), inst, () => {
+          instrument = inst;
+          dbg.instrument = inst;
+          choices.forEach((c, k) => c.classList.toggle("on", INSTRUMENTS[k] === inst));
+          bars.el.dataset.inst = inst;
+          bounce(b);
+          arpeggio([0, 2, 4, 7], 0.1, inst);
+        }, `mx-inst${inst === instrument ? " on" : ""}`);
+        return b;
+      });
+      bars.el.dataset.inst = instrument;
+      dbg.instrument = instrument;
+      show("mx-xylo", [spacer(), ...choices], bars.el, picker);
     }
 
     // ---- Drums -----------------------------------------------------------------
@@ -215,22 +248,28 @@ export const music: Game = {
 
     let toldGlow = false;
 
-    function songPick(say = false) {
+    function songPick(page = 0, say = false) {
       fresh("songs");
+      const pages = Math.ceil(SONGS.length / SONG_PAGE);
+      page = ((page % pages) + pages) % pages;
+      const songs = SONGS.slice(page * SONG_PAGE, page * SONG_PAGE + SONG_PAGE);
       const grid = h(
         "div",
-        { class: "mx-grid mx-songs", style: `--n:${SONGS.length}` },
-        ...SONGS.map((s, i) => {
+        { class: "mx-grid mx-songs", style: `--n:${songs.length}` },
+        ...songs.map((s, i) => {
           const b = h("button", { class: "mx-tile pop-in", style: `animation-delay:${i * 50}ms`, "aria-label": s.title }, songPicture(s), h("span", { class: "mx-badge", html: MUSIC_ART.songs }));
-          b.addEventListener("click", () => songPlay(s));
+          b.addEventListener("click", () => songPlay(s, page));
           return b;
         }),
       );
-      show("mx-pick", [spacer()], grid, picker);
+      const dots = h("span", { class: "mx-dots", "aria-hidden": "true" }, ...Array.from({ length: pages }, (_, k) => h("i", { class: k === page ? "on" : "" })));
+      const more = roundBtn(icon("🔄"), "More songs", () => songPick(page + 1));
+      show("mx-pick", [spacer(), dots, spacer(), more], grid, picker);
+      dbg.songPage = page;
       if (say) void speak(SAY.pickSong);
     }
 
-    function songPlay(song: Song) {
+    function songPlay(song: Song, page = 0) {
       const signal = fresh("song");
       let step = 0;
       let done = false;
@@ -243,7 +282,7 @@ export const music: Game = {
       const againBtn = roundBtn(icon("🔁"), "Again", () => restart(), "mx-again hidden");
 
       const bars = makeBars(signal, (i, at) => {
-        mixer?.mallet(SCALE_HZ[i]);
+        mixer?.note(instrument, SCALE_HZ[i]);
         bars.hit(i, at);
         lastTap = performance.now();
         if (listening) stopListening();
@@ -271,7 +310,7 @@ export const music: Game = {
           while (k < times.length && start + times[k] < until) {
             const n = song.notes[k];
             const at = start + times[k];
-            mixer.mallet(SCALE_HZ[n.bar], at);
+            mixer.note(instrument, SCALE_HZ[n.bar], at);
             t.show(at, () => bars.hit(n.bar));
             k++;
           }
@@ -302,9 +341,9 @@ export const music: Game = {
         againBtn.classList.remove("hidden");
         // A rainbow run up the bars, then hooray.
         if (mixer) {
-          [0, 2, 4, 7].forEach((b, k) => mixer.mallet(SCALE_HZ[b], mixer.now + 0.25 + k * 0.1, 0.8));
-          mixer.mallet(SCALE_HZ[0], mixer.now + 0.65, 0.6);
-          mixer.mallet(SCALE_HZ[4], mixer.now + 0.65, 0.6);
+          [0, 2, 4, 7].forEach((b, k) => mixer.note(instrument, SCALE_HZ[b], mixer.now + 0.25 + k * 0.1, 0.8));
+          mixer.note(instrument, SCALE_HZ[0], mixer.now + 0.65, 0.6);
+          mixer.note(instrument, SCALE_HZ[4], mixer.now + 0.65, 0.6);
         }
         bars.bars.forEach((_, k) =>
           setTimeout(() => {
@@ -337,7 +376,8 @@ export const music: Game = {
         stopListening();
       });
 
-      show("mx-song", [progress, againBtn, listenBtn], bars.el, () => songPick());
+      bars.el.dataset.inst = instrument;
+      show("mx-song", [progress, againBtn, listenBtn], bars.el, () => songPick(page));
       update();
       dbg.step = 0;
       dbg.song = song.id;
@@ -350,5 +390,12 @@ export const music: Game = {
     picker();
     void speak(SAY.intro);
   },
-  lines: () => [...Object.values(SAY), ...SONGS.map((s) => s.title), ...singers().map((i) => line.name(i))],
+  lines: () => [
+    ...Object.values(SAY),
+    ...Object.values(PARROT_SAY),
+    ...Object.values(GRID_SAY),
+    ...Object.values(DANCE_SAY),
+    ...SONGS.map((s) => s.title),
+    ...singers().map((i) => line.name(i)),
+  ],
 };
