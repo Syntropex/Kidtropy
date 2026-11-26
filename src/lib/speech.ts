@@ -188,7 +188,8 @@ export function listen(opts: { timeoutMs?: number; onHeard?: (alts: string[]) =>
     rec.lang = "en-US";
     rec.interimResults = true;
     rec.maxAlternatives = 5;
-    rec.continuous = false;
+    // Keep listening through little pauses; we stop as soon as we hear a match or time runs out.
+    rec.continuous = true;
     const heard: string[] = [];
     let reason: ListenResult["reason"] = "silence";
     let settled = false;

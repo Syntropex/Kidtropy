@@ -1645,3 +1645,23 @@ a:focus-visible {
     opacity: 0;
   }
 }
+
+/* ---- Talk Time: tap-to-talk ---------------------------------------------------- */
+
+.mic-slot {
+  min-height: 132px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.round-btn.yes.big {
+  width: 112px;
+  height: 112px;
+  font-size: 60px;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.talk-wrap .mic-btn:not(.listening) .mic-icon {
+  animation: pulse 1.6s ease-in-out infinite;
+}

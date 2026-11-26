@@ -14,19 +14,11 @@
 import { ITEMS, type Item } from "../data/items";
 import { findSpokenItem, heardItem } from "../lib/match";
 import { sfx } from "../lib/sfx";
-import { canListen, cancelListening, listen, micSupported, speak } from "../lib/speech";
+import { canListen, cancelListening, listen, micSupported, speak, stopSpeaking } from "../lib/speech";
 import { bounce, capitalize, h, icon, makeDeck, pic, pickOne, pool, reward, shuffle, wait } from "../lib/ui";
 import type { Game, Scene } from "./types";
 import { ASK, HINT_LEADS, JOKES, line, REVEAL_LEADS, SAY, TALK_YES } from "../voice/lines";
 
-function earsIndicator() {
-  return h(
-    "div",
-    { class: "listen-badge", "aria-live": "polite" },
-    h("div", { class: "rings", "aria-hidden": "true" }, h("i"), h("i"), h("i")),
-    h("div", { class: "mic", "aria-hidden": "true" }, icon("🎤")),
-  );
-}
 
 export const talk: Game = {
   id: "talk",
@@ -75,27 +67,42 @@ function askMode(scene: Scene) {
   const stage = h("div", { class: "talk-stage" });
   const word = h("div", { class: "big-word", "aria-live": "polite" });
   const heardText = h("div", { class: "heard-text" });
-  const badgeSlot = h("div", { class: "badge-slot" });
+  const micSlot = h("div", { class: "mic-slot" });
   const controls = h("div", { class: "talk-controls" });
-  root.replaceChildren(h("div", { class: "talk-wrap" }, stage, word, badgeSlot, heardText, controls));
+  root.replaceChildren(h("div", { class: "talk-wrap" }, stage, word, heardText, micSlot, controls));
 
+  // The child is in charge: nothing moves on until they talk or tap.
+  // Listening always starts from a tap, because iPhone/iPad only allow the
+  // microphone right after a tap.
   async function play() {
     const id = ++round;
     const live = () => scene.alive() && id === round;
     const item = next();
     let solved = false;
+    let tries = 0;
+    let listening = false;
+    let nudge = 0;
 
     const picture = h("button", { class: "talk-pic pop-in", "aria-label": "Picture. Tap to hear the question again." }, pic(item));
     stage.replaceChildren(picture);
     word.textContent = "";
     heardText.textContent = "";
-    badgeSlot.replaceChildren();
+
+    const remind = () => {
+      clearTimeout(nudge);
+      nudge = window.setTimeout(() => {
+        if (live() && !solved && !listening) void speak(canListen() ? SAY.tapMic : SAY.sayItOutLoud);
+      }, 14000);
+    };
+    scene.signal.addEventListener("abort", () => clearTimeout(nudge));
 
     const win = async () => {
       if (solved || !live()) return;
       solved = true;
+      clearTimeout(nudge);
       cancelListening();
-      badgeSlot.replaceChildren();
+      micBtn.classList.remove("listening");
+      micBtn.classList.add("hidden");
       word.textContent = capitalize(item.name);
       bounce(picture);
       void reward(picture);
@@ -108,80 +115,87 @@ function askMode(scene: Scene) {
     const reveal = async (lead: (typeof REVEAL_LEADS)[number]) => {
       word.textContent = capitalize(item.name);
       await speak(line.reveal(item, lead));
+      remind();
     };
 
     picture.onclick = async () => {
       bounce(picture);
-      if (solved) {
-        await speak(line.tapItem(item));
-      } else {
-        await speak(pickOne(ASK));
-      }
+      await speak(solved ? line.tapItem(item) : pickOne(ASK));
     };
 
-    controls.replaceChildren(
-      h("button", { class: "round-btn hint", "aria-label": "Hint: hear the answer", onclick: () => !solved && reveal("Here's a hint!") }, icon("💡")),
-      h("button", { class: "round-btn yes", "aria-label": "They said it!", onclick: () => win() }, icon("👍")),
-      h("button", { class: "round-btn skip", "aria-label": "Next picture", onclick: () => (sfx.whoosh(), play()) }, icon("➡️")),
+    const micBtn = h(
+      "button",
+      { class: "mic-btn", "aria-label": "Tap and talk" },
+      h("span", { class: "rings", "aria-hidden": "true" }, h("i"), h("i"), h("i")),
+      h("span", { class: "mic-icon" }, icon("🎤")),
     );
 
-    await wait(350);
-    if (!live()) return;
-    await speak(round === 1 ? `${SAY.letsPlay} ${pickOne(ASK)}` : pickOne(ASK));
-
-    if (!canListen()) {
-      // No microphone: let them say it out loud, then tell them the answer.
-      await wait(3500);
-      if (!live() || solved) return;
-      await reveal("Did you say it?");
-      return;
-    }
-
-    for (let attempt = 0; attempt < 2 && live() && !solved; attempt++) {
-      badgeSlot.replaceChildren(earsIndicator());
-      sfx.listen();
-      const res = await listen({
-        timeoutMs: 6500,
+    micBtn.onclick = async () => {
+      if (solved || listening || !live()) return;
+      listening = true;
+      clearTimeout(nudge);
+      stopSpeaking();
+      heardText.textContent = "";
+      micBtn.classList.add("listening");
+      // Start right away (inside the tap) so iOS allows it.
+      const pending = listen({
+        timeoutMs: 8000,
         onHeard: (alts) => {
           heardText.textContent = alts[0] ? `“${alts[0]}”` : "";
           return heardItem(alts, item);
         },
       });
+      sfx.listen();
+      const res = await pending;
+      listening = false;
+      micBtn.classList.remove("listening");
       if (!live() || solved) return;
-      badgeSlot.replaceChildren();
       if (heardItem(res.alternatives, item)) return win();
-      if (res.reason === "blocked") {
-        heardText.textContent = "Grown-ups: allow the microphone to play with talking. You can still tap 👍.";
-        await reveal("Hmm!");
+      if (res.reason === "blocked" || res.reason === "error") {
+        heardText.textContent =
+          res.reason === "blocked"
+            ? "Grown-ups: allow the microphone (and on iPhone/iPad turn on Siri & Dictation) to play with talking. You can still tap 👍."
+            : "Grown-ups: the microphone isn't working right now. You can still say it out loud and tap 👍.";
+        micBtn.classList.add("hidden");
+        thumbs.classList.add("big");
+        await speak(SAY.sayItOutLoud);
         return;
       }
-      if (attempt === 0) {
-        await speak(line.hint(item, HINT_LEADS[res.alternatives.length ? 0 : 1]));
-      } else {
-        await reveal("Good try!");
-        if (!live() || solved) return;
-        // One last listen in case they repeat it.
-        badgeSlot.replaceChildren(earsIndicator());
-        sfx.listen();
-        const last = await listen({ timeoutMs: 5000, onHeard: (alts) => heardItem(alts, item) });
-        if (!live() || solved) return;
-        badgeSlot.replaceChildren();
-        if (heardItem(last.alternatives, item)) return win();
-        await speak(SAY.tryAnother);
-        await wait(500);
-        if (live() && !solved) void play();
+      if (!res.alternatives.length) {
+        await speak(SAY.didntHear);
+        remind();
+        return;
       }
-    }
+      tries++;
+      if (tries === 1) await speak(line.hint(item, HINT_LEADS[0]));
+      else if (tries === 2) await reveal("Good try!");
+      else await speak(SAY.tapArrow);
+      remind();
+    };
+
+    const thumbs = h("button", { class: "round-btn yes", "aria-label": "They said it!", onclick: () => win() }, icon("👍"));
+    controls.replaceChildren(
+      h("button", { class: "round-btn hint", "aria-label": "Hint: hear the answer", onclick: () => !solved && reveal("Here's a hint!") }, icon("💡")),
+      thumbs,
+      h("button", { class: "round-btn skip", "aria-label": "Next picture", onclick: () => (sfx.whoosh(), play()) }, icon("➡️")),
+    );
+    const mic = canListen();
+    micSlot.replaceChildren(mic ? micBtn : "");
+    thumbs.classList.toggle("big", !mic);
+
+    await wait(300);
+    if (!live()) return;
+    const ask = pickOne(ASK);
+    await speak(`${round === 1 ? SAY.letsPlay : ""} ${ask} ${mic ? SAY.tapMic : SAY.sayItOutLoud}`);
+    if (live() && !solved) remind();
   }
 
-  const stop = () => {
+  scene.signal.addEventListener("abort", () => {
     round++;
     cancelListening();
-  };
-  scene.signal.addEventListener("abort", stop);
+  });
   void play();
 }
-
 
 // ---------------------------------------------------------------------------
 // "Show me!" — the child talks, Kidtropy shows.
@@ -243,7 +257,7 @@ function showMode(scene: Scene) {
     sfx.listen();
     heardText.textContent = "";
     const res = await listen({
-      timeoutMs: 6000,
+      timeoutMs: 8000,
       onHeard: (alts) => {
         heardText.textContent = alts[0] ? `“${alts[0]}”` : "";
         return !!findSpokenItem(alts, ITEMS);

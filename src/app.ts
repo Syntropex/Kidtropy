@@ -361,7 +361,8 @@ function grownups() {
           h("li", {}, "Tap the theme bubbles on the home screen to pick what your kid loves (trucks, diggers, dinosaurs…). Pick none for everything."),
           h("li", {}, "Install it: in Safari tap Share → Add to Home Screen. It then works full-screen and offline (except listening)."),
           h("li", {}, "For focused play on iPad/iPhone, turn on Guided Access (Settings → Accessibility)."),
-          h("li", {}, "In Talk Time, kids' voices are hard for computers to hear. If they said it right and it didn't notice, tap 👍."),
+          h("li", {}, "In Talk Time, your kid taps the big microphone, then talks. Kids' voices are hard for computers to hear, so if they said it right and it didn't notice, tap 👍."),
+          h("li", {}, "Talking needs microphone permission. On iPhone/iPad it also needs Siri & Dictation turned on (Settings → Siri, and Settings → General → Keyboard → Enable Dictation). Without it, Talk Time still works: say it out loud and tap 👍."),
         ),
       ),
       h(
