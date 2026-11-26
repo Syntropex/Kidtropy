@@ -7,6 +7,8 @@ import { sfx } from "../lib/sfx";
 import { speak } from "../lib/speech";
 import { bounce, h } from "../lib/ui";
 import { colorLines, colorPage, pageById, pagePicker, PAGES, prepare, renderPage, type Page } from "./draw-color";
+import { DOT_PICS, type DotPic } from "./draw-dots-data";
+import { dotGame, dotLines, dotsFace, dotsPicker } from "./draw-dots";
 import { freeDraw, freeLines } from "./draw-free";
 import { crayonBox, entryFace, galleryScreen } from "./draw-gallery";
 import { gallery, ICONS, PALETTE, SAY, sharedLines, svgIcon, type ColorEntry, type FreeEntry } from "./draw-shared";
@@ -50,13 +52,14 @@ export const draw: Game = {
           "div",
           { class: "d-home" },
           card("d-card-color", "Coloring pages", coloringFace(), pick, 0),
-          card("d-card-free", "Free draw", h("span", { class: "d-card-face" }, svgIcon(ICONS.squiggle, "d-squiggle"), svgIcon(ICONS.sparkle, "d-card-spark")), () => free(), 1),
+          card("d-card-dots", "Dot to dot", h("span", { class: "d-card-face" }, dotsFace()), dotsPick, 1),
+          card("d-card-free", "Free draw", h("span", { class: "d-card-face" }, svgIcon(ICONS.squiggle, "d-squiggle"), svgIcon(ICONS.sparkle, "d-card-spark")), () => free(), 2),
           card(
             "d-card-art",
             "My art",
             h("span", { class: "d-card-face d-frame-face" }, svgIcon(ICONS.frame, "d-frame-ico"), artFace ? h("span", { class: "d-frame-pic" }, artFace) : null),
             art,
-            2,
+            3,
           ),
         ),
       );
@@ -73,7 +76,27 @@ export const draw: Game = {
 
     function color(page: Page, entry?: ColorEntry) {
       const s = screen();
-      colorPage(root, { page, entry, ...s, back: entry ? art : pick, done: art });
+      const back = entry ? art : page.cat === "dots" ? dotsPick : pick;
+      colorPage(root, { page, entry, ...s, back, done: art });
+    }
+
+    function dotsPick() {
+      const s = screen();
+      dotsPicker(root, s.signal, home, dots);
+    }
+
+    function dots(p: DotPic) {
+      const s = screen();
+      dotGame(root, {
+        pic: p,
+        ...s,
+        back: dotsPick,
+        color: () => {
+          const page = pageById.get(`dots-${p.id}`);
+          if (page) color(page);
+        },
+        next: () => dots(DOT_PICS[(DOT_PICS.indexOf(p) + 1) % DOT_PICS.length]),
+      });
     }
 
     function free(entry?: FreeEntry) {
@@ -99,7 +122,7 @@ export const draw: Game = {
     home();
     return () => sub?.abort();
   },
-  lines: () => [...sharedLines(), ...colorLines(), ...freeLines()],
+  lines: () => [...sharedLines(), ...colorLines(), ...freeLines(), ...dotLines()],
 };
 
 /** A half-colored excavator page with crayons: "this is where you color". */

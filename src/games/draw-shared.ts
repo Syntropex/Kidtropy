@@ -84,6 +84,10 @@ export const SAY = {
   rainbowBrush: "Rainbow brush!",
   sparkle: "Sparkles!",
   eraser: "Eraser!",
+  neon: "Glow brush!",
+  trail: "Stamp trail! Drag to make a line of pictures.",
+  mirror: "Mirror magic!",
+  pickScene: "Pick a picture to draw on!",
   thin: "Thin!",
   fat: "Fat!",
 };
@@ -178,7 +182,22 @@ const S = (inner: string, vb = "0 0 100 100") =>
 /** A thick colored line with a dark outline (two strokes). */
 const bar = (d: string, c: string, w: number) => `<path d="${d}" stroke-width="${w + 10}"/><path d="${d}" stroke="${c}" stroke-width="${w}"/>`;
 
+const crayonInBox = (x: number, c: string, rot: number) =>
+  `<g transform="rotate(${rot} ${x + 8} 60)"><path d="M${x} 30l8-20 8 20z" fill="${c}"/><rect x="${x}" y="28" width="16" height="44" rx="3" fill="${c}"/></g>`;
+
 export const ICONS = {
+  crayons:
+    `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round">` +
+    crayonInBox(16, "#e53935", -12) +
+    crayonInBox(34, "#fdd835", -4) +
+    crayonInBox(52, "#43a047", 4) +
+    crayonInBox(70, "#1e63d6", 12) +
+    `<path d="M10 58h80l-6 34H16z" fill="#ff9800"/><path d="M28 72h44" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/></svg>`,
+  dots: S(
+    `<path d="M18 78L34 26L62 52L84 20" stroke="#ff7043" stroke-width="6" stroke-dasharray="1 0"/>` +
+      `<path d="M84 20L78 80" stroke="#ff7043" stroke-width="5" stroke-dasharray="4 9"/>` +
+      `<circle cx="18" cy="78" r="7" fill="#2b2b3a" stroke="none"/><circle cx="34" cy="26" r="7" fill="#2b2b3a" stroke="none"/><circle cx="62" cy="52" r="7" fill="#2b2b3a" stroke="none"/><circle cx="84" cy="20" r="7" fill="#2b2b3a" stroke="none"/><circle cx="78" cy="80" r="7" fill="#ffd740" stroke-width="4"/>`,
+  ),
   undo: S(bar("M38 30h22a20 20 0 0 1 0 40H34", "#ffb300", 12) + `<path d="M44 12L18 30l26 18z" fill="#ffb300"/>`),
   trash: S(
     `<path d="M24 32h52l-6 58H30z" fill="#4fc3f7"/><path d="M40 44v34M60 44v34" stroke-width="5"/>` +
@@ -223,6 +242,28 @@ export const ICONS = {
       `<rect x="18" y="50" width="64" height="18" rx="5" fill="#a1887f"/><rect x="22" y="68" width="56" height="10" rx="3" fill="#e53935"/>` +
       `<path d="M30 92h40" stroke="#e53935" stroke-width="7"/>`,
   ),
+  neon: S(
+    `<path d="M16 70q16-44 34-20t34-24" stroke="#00e5ff" stroke-width="22" opacity=".25"/>` +
+      `<path d="M16 70q16-44 34-20t34-24" stroke="#00e5ff" stroke-width="12" opacity=".5"/>` +
+      `<path d="M16 70q16-44 34-20t34-24" stroke="#e0f7fa" stroke-width="5"/>`,
+  ),
+  trail: S(
+    `<path d="M10 84q30-10 40-36t40-34" stroke="#bdbdbd" stroke-width="4" stroke-dasharray="2 9"/>` +
+      `<path d="M14 80l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" transform="translate(-4 -12)" fill="#ffd740" stroke-width="3"/>` +
+      `<path d="M50 44l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" transform="translate(-2 -6)" fill="#ff8a80" stroke-width="3"/>` +
+      `<path d="M84 10l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" transform="translate(-4 0)" fill="#80d8ff" stroke-width="3"/>`,
+  ),
+  mirror: S(
+    `<path d="M50 10v80" stroke="#90a4ae" stroke-width="4" stroke-dasharray="6 7"/>` +
+      `<path d="M44 50q-22-34-36-20q-6 18 12 24q-16 8-8 22q14 8 32-18z" fill="#ff80ab" stroke-width="4"/>` +
+      `<path d="M56 50q22-34 36-20q6 18-12 24q16 8 8 22q-14 8-32-18z" fill="#ff80ab" stroke-width="4"/>`,
+  ),
+  scene: S(
+    `<rect x="8" y="16" width="84" height="68" rx="10" fill="#b3e5fc"/>` +
+      `<path d="M8 66q20-16 42-4t42-6v18q0 10-10 10H18q-10 0-10-10z" fill="#9ccc65" stroke-width="5"/>` +
+      `<circle cx="70" cy="36" r="9" fill="#fff176" stroke-width="4"/>` +
+      `<path d="M8 72h84" stroke="none"/>`,
+  ),
   dotSmall: S(`<circle cx="50" cy="50" r="12" fill="var(--c, #2b2b3a)" stroke-width="4"/>`),
   dotBig: S(`<circle cx="50" cy="50" r="30" fill="var(--c, #2b2b3a)" stroke-width="5"/>`),
   squiggle: S(
@@ -254,6 +295,8 @@ export interface FreeEntry {
   img: string;
   w: number;
   h: number;
+  /** The background it was drawn on. */
+  bg?: string;
 }
 
 export type Entry = ColorEntry | FreeEntry;
@@ -345,11 +388,15 @@ export function putPageDraft(page: string, draft: PageDraft | null) {
 
 /** The free drawing in progress. */
 export interface FreeDraft {
+  /** The ink layer (PNG with see-through paper), or the whole picture when `flat`. */
   img: string;
   w: number;
   h: number;
   entry?: string;
   dirty: number;
+  /** false: img is only the ink; anything else (older drafts too): the whole picture. */
+  flat?: boolean;
+  bg?: string;
 }
 
 export function freeDraft(): FreeDraft | null {

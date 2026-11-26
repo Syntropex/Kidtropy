@@ -27,38 +27,54 @@ import {
   type PageDraft,
 } from "./draw-shared";
 import { palette } from "./draw-palette";
+import { DOT_PICS } from "./draw-dots-data";
+import { MORE_PAGES } from "./draw-pages";
 
 const INK = "#2b2b3a";
 /** Small colored details become a soft shadow so they show on any color. */
 const SHADOW = "rgba(43,43,58,.18)";
 const WHITE = "#ffffff";
 
+export type Cat = "trucks" | "diggers" | "dinos" | "animals" | "scenes" | "dots";
+
 export interface Page {
   id: string;
   name: string;
   svg: string;
+  cat: Cat;
 }
 
 const named = (id: string, fallback: string) => byId.get(id)?.name ?? fallback;
 
 export const PAGES: Page[] = [
-  { id: "excavator", name: named("excavator", "excavator"), svg: ART.excavator },
-  { id: "dumptruck", name: named("dumptruck", "dump truck"), svg: ART.dumptruck },
-  { id: "bulldozer", name: named("bulldozer", "bulldozer"), svg: ART.bulldozer },
-  { id: "mixer", name: named("mixer", "cement mixer"), svg: ART.mixer },
-  { id: "triceratops", name: named("triceratops", "triceratops"), svg: ART.triceratops },
-  { id: "stegosaurus", name: named("stegosaurus", "stegosaurus"), svg: ART.stegosaurus },
-  { id: "pterodactyl", name: named("pterodactyl", "pterodactyl"), svg: ART.pterodactyl },
-  { id: "racecar", name: "race car", svg: raceCar("#e53935") },
-  { id: "monster", name: named("monster", "monster truck"), svg: ART.monster },
-  { id: "garbage", name: named("garbage", "garbage truck"), svg: ART.garbage },
-  { id: "tow", name: named("tow", "tow truck"), svg: ART.tow },
-  { id: "roller", name: named("roller", "road roller"), svg: ART.roller },
-  { id: "car", name: "car", svg: colorCar("#1e88e5") },
-  { id: "truck", name: "pickup truck", svg: colorTruck("#43a047") },
-  { id: "cone", name: named("cone", "traffic cone"), svg: ART.cone },
-  { id: "fossil", name: "dinosaur fossil", svg: ART.fossil },
+  { id: "excavator", name: named("excavator", "excavator"), svg: ART.excavator, cat: "diggers" as Cat },
+  { id: "dumptruck", name: named("dumptruck", "dump truck"), svg: ART.dumptruck, cat: "diggers" as Cat },
+  { id: "bulldozer", name: named("bulldozer", "bulldozer"), svg: ART.bulldozer, cat: "diggers" as Cat },
+  { id: "mixer", name: named("mixer", "cement mixer"), svg: ART.mixer, cat: "diggers" as Cat },
+  { id: "roller", name: named("roller", "road roller"), svg: ART.roller, cat: "diggers" as Cat },
+  { id: "cone", name: named("cone", "traffic cone"), svg: ART.cone, cat: "diggers" as Cat },
+  { id: "racecar", name: "race car", svg: raceCar("#e53935"), cat: "trucks" as Cat },
+  { id: "monster", name: named("monster", "monster truck"), svg: ART.monster, cat: "trucks" as Cat },
+  { id: "garbage", name: named("garbage", "garbage truck"), svg: ART.garbage, cat: "trucks" as Cat },
+  { id: "tow", name: named("tow", "tow truck"), svg: ART.tow, cat: "trucks" as Cat },
+  { id: "car", name: "car", svg: colorCar("#1e88e5"), cat: "trucks" as Cat },
+  { id: "truck", name: "pickup truck", svg: colorTruck("#43a047"), cat: "trucks" as Cat },
+  { id: "triceratops", name: named("triceratops", "triceratops"), svg: ART.triceratops, cat: "dinos" as Cat },
+  { id: "stegosaurus", name: named("stegosaurus", "stegosaurus"), svg: ART.stegosaurus, cat: "dinos" as Cat },
+  { id: "pterodactyl", name: named("pterodactyl", "pterodactyl"), svg: ART.pterodactyl, cat: "dinos" as Cat },
+  { id: "fossil", name: "dinosaur fossil", svg: ART.fossil, cat: "dinos" as Cat },
+  ...MORE_PAGES,
+  ...DOT_PICS.map((d) => ({ id: `dots-${d.id}`, name: d.name, svg: d.art, cat: "dots" as Cat })),
 ].filter((p) => !!p.svg);
+
+/** The picker's tabs (dot-to-dot pictures are colored from the dot-to-dot mode). */
+export const TABS: { cat: Cat; glyph: string; label: string }[] = [
+  { cat: "trucks", glyph: "🚒", label: "Trucks" },
+  { cat: "diggers", glyph: "🏗️", label: "Diggers" },
+  { cat: "dinos", glyph: "🦖", label: "Dinosaurs" },
+  { cat: "animals", glyph: "🦁", label: "Animals" },
+  { cat: "scenes", glyph: "🏡", label: "Pictures" },
+];
 
 export const pageById = new Map(PAGES.map((p) => [p.id, p]));
 
@@ -296,53 +312,93 @@ export async function pageToCanvas(page: Page, fills: Fills, size = 1024): Promi
 // ---------------------------------------------------------------------------
 // The page picker
 
+let lastTab: Cat = "trucks";
+let saidPick = false;
+
 export function pagePicker(root: HTMLElement, signal: AbortSignal, back: () => void, open: (p: Page) => void) {
   const drafts = pageDrafts();
   const grid = h("div", { class: "d-fitgrid cp-pick" });
-  PAGES.forEach((p, i) => {
-    const d = drafts[p.id];
-    const started = d && Object.keys(d.fills).length > 0 && d.n === prepare(p).n;
-    const face = started ? renderPage(p, d.fills) : h("span", { class: "pic art", html: p.svg });
-    const b = h(
-      "button",
-      { class: `cp-thumb pop-in ${started ? "started" : ""}`, style: `animation-delay:${i * 25}ms`, "aria-label": p.name },
-      face,
-      started ? svgIcon(ICONS.sparkle, "cp-badge") : null,
+  let count = 0;
+  const refit = fitSquares(grid, () => count, signal, 14, 240);
+  const tabBtns = new Map<Cat, HTMLButtonElement>();
+
+  function show(cat: Cat) {
+    lastTab = cat;
+    tabBtns.forEach((b, c) => b.classList.toggle("sel", c === cat));
+    const pages = PAGES.filter((p) => p.cat === cat);
+    count = pages.length;
+    grid.replaceChildren(
+      ...pages.map((p, i) => {
+        const d = drafts[p.id];
+        const started = d && Object.keys(d.fills).length > 0 && d.n === prepare(p).n;
+        const face = started ? renderPage(p, d.fills) : h("span", { class: "pic art", html: p.svg });
+        const b = h(
+          "button",
+          { class: `cp-thumb pop-in ${started ? "started" : ""}`, style: `animation-delay:${i * 25}ms`, "aria-label": p.name },
+          face,
+          started ? svgIcon(ICONS.sparkle, "cp-badge") : null,
+        );
+        b.addEventListener("click", () => {
+          sfx.pop();
+          bounce(b);
+          setTimeout(() => open(p), 160);
+        });
+        return b;
+      }),
     );
-    b.addEventListener("click", () => {
-      sfx.pop();
-      bounce(b);
-      setTimeout(() => open(p), 160);
-    });
-    grid.append(b);
-  });
-  root.replaceChildren(h("div", { class: "d-screen" }, h("div", { class: "d-bar" }, dBtn(fluent("⬅"), "Back", back)), grid));
-  fitSquares(grid, PAGES.length, signal, 14, 200);
-  void speak(SAY.pickPage);
+    refit();
+  }
+
+  const tabs = h(
+    "div",
+    { class: "d-tabs" },
+    ...TABS.map((t) => {
+      const b = dBtn(fluent(t.glyph), t.label, () => {
+        bounce(b);
+        show(t.cat);
+      }, "d-tab");
+      tabBtns.set(t.cat, b);
+      return b;
+    }),
+  );
+  root.replaceChildren(h("div", { class: "d-screen" }, h("div", { class: "d-bar d-bar-tabs" }, dBtn(fluent("⬅"), "Back", back), tabs), grid));
+  show(lastTab);
+  if (!saidPick) {
+    saidPick = true;
+    void speak(SAY.pickPage);
+  }
 }
 
 /** Size a grid of square buttons as big as they fit. */
-export function fitSquares(grid: HTMLElement, n: number, signal: AbortSignal, gap = 12, max = 220) {
+export function fitSquares(grid: HTMLElement, count: number | (() => number), signal: AbortSignal, gap = 12, max = 220, min = 0): () => void {
   const fit = () => {
     const r = grid.getBoundingClientRect();
-    if (!r.width || !r.height) return;
-    const options: { cell: number; empty: number }[] = [];
+    const n = typeof count === "number" ? count : count();
+    if (!r.width || !r.height || !n) return;
+    const options: { cell: number; empty: number; cols: number }[] = [];
     for (let cols = 1; cols <= n; cols++) {
       const rows = Math.ceil(n / cols);
       const cell = Math.min((r.width - (cols - 1) * gap) / cols, (r.height - 16 - (rows - 1) * gap) / rows, max);
-      options.push({ cell, empty: cols * rows - n });
+      options.push({ cell, empty: cols * rows - n, cols });
     }
     const top = Math.max(...options.map((o) => o.cell));
     // Nearly as big but with no lonely picture on the last row? Prefer that.
-    const pickd = options.filter((o) => o.cell >= top * 0.94).sort((x, y) => x.empty - y.empty || y.cell - x.cell)[0];
-    grid.style.setProperty("--cell", `${Math.floor(pickd.cell)}px`);
-    grid.style.setProperty("--cols", String(options.indexOf(pickd) + 1));
+    let pick = options.filter((o) => o.cell >= top * 0.94).sort((x, y) => x.empty - y.empty || y.cell - x.cell)[0];
+    // Too many to fit? Keep them a good size and let the grid scroll.
+    if (min && pick.cell < min) {
+      const cols = Math.max(1, Math.floor((r.width + gap) / (min + gap)));
+      pick = { cell: Math.min(max, (r.width - (cols - 1) * gap) / cols), empty: 0, cols };
+    }
+    grid.classList.toggle("d-scroll", !!min && pick.cell * Math.ceil(n / pick.cols) + gap * (Math.ceil(n / pick.cols) - 1) > r.height - 16);
+    grid.style.setProperty("--cell", `${Math.floor(pick.cell)}px`);
+    grid.style.setProperty("--cols", String(pick.cols));
     grid.style.setProperty("--gap", `${gap}px`);
   };
   const ro = new ResizeObserver(fit);
   ro.observe(grid);
   signal.addEventListener("abort", () => ro.disconnect());
   requestAnimationFrame(fit);
+  return fit;
 }
 
 // ---------------------------------------------------------------------------

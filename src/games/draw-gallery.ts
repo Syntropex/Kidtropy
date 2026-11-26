@@ -75,7 +75,7 @@ export function galleryScreen(root: HTMLElement, o: GalleryOpts) {
     grid.append(b);
   });
   root.replaceChildren(h("div", { class: "d-screen" }, bar, grid));
-  fitSquares(grid, items.length, o.signal, 16, 230);
+  fitSquares(grid, items.length, o.signal, 16, 230, 110);
   if (!said) {
     said = true;
     void speak(SAY.gallery);
@@ -156,15 +156,4 @@ async function toBlob(e: Entry): Promise<Blob | null> {
 }
 
 /** A few crayons standing in a box (the coloring-pages icon). */
-export function crayonBox(): string {
-  const cr = (x: number, c: string, rot: number) =>
-    `<g transform="rotate(${rot} ${x + 8} 60)"><path d="M${x} 30l8-20 8 20z" fill="${c}"/><rect x="${x}" y="28" width="16" height="44" rx="3" fill="${c}"/></g>`;
-  return (
-    `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" stroke="#2b2b3a" stroke-width="4" stroke-linejoin="round">` +
-    cr(16, "#e53935", -12) +
-    cr(34, "#fdd835", -4) +
-    cr(52, "#43a047", 4) +
-    cr(70, "#1e63d6", 12) +
-    `<path d="M10 58h80l-6 34H16z" fill="#ff9800"/><path d="M28 72h44" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/></svg>`
-  );
-}
+export const crayonBox = (): string => ICONS.crayons;

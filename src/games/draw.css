@@ -110,7 +110,8 @@ body:has(.game-draw) {
 .d-home {
   height: 100%;
   display: grid;
-  grid-template-rows: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 14px;
   padding: 4px 0 10px;
 }
@@ -136,6 +137,15 @@ body:has(.game-draw) {
 
 .d-card-color {
   background: linear-gradient(160deg, #ffe082, #ffb74d);
+}
+
+.d-card-dots {
+  background: linear-gradient(160deg, #dcedc8, #9ccc65);
+}
+
+.d-card-dots .dd-svg {
+  width: 100%;
+  height: 100%;
 }
 
 .d-card-free {
@@ -257,8 +267,7 @@ body:has(.game-draw) {
 
 /* ---- palette ------------------------------------------------------------------- */
 
-.d-palette,
-.d-tray {
+.d-palette {
   --cols: 5;
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
@@ -270,13 +279,11 @@ body:has(.game-draw) {
   box-shadow: var(--shadow);
 }
 
-.fd-studio .d-palette,
-.fd-studio .d-tray {
+.fd-studio .d-palette {
   --cols: 6;
 }
 
-.fd-studio .d-palette,
-.fd-studio .d-tray {
+.fd-studio .d-palette {
   grid-auto-rows: calc(var(--b) * 0.8);
 }
 
@@ -330,14 +337,14 @@ body:has(.game-draw) {
 
 .d-brushes {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
   justify-items: center;
 }
 
 .d-brush {
   width: min(var(--b), 100%);
-  height: calc(var(--b) * 0.86);
+  height: calc(var(--b) * 0.8);
   border-radius: 22px;
 }
 
@@ -691,8 +698,6 @@ body:has(.game-draw) {
   }
 
   .d-home {
-    grid-template-rows: minmax(0, 1fr);
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     padding: 4px 0 16px;
   }
 
@@ -720,9 +725,7 @@ body:has(.game-draw) {
   }
 
   .d-palette,
-  .d-tray,
-  .fd-studio .d-palette,
-  .fd-studio .d-tray {
+  .fd-studio .d-palette {
     --cols: 3;
   }
 
@@ -730,8 +733,7 @@ body:has(.game-draw) {
     grid-auto-rows: calc(var(--b) * 1.05);
   }
 
-  .fd-studio .d-palette,
-  .fd-studio .d-tray {
+  .fd-studio .d-palette {
     grid-auto-rows: calc(var(--b) * 0.86);
   }
 
@@ -740,7 +742,7 @@ body:has(.game-draw) {
   }
 
   .d-brushes {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .d-bar {
@@ -778,9 +780,7 @@ body:has(.game-draw) {
   }
 
   .d-palette,
-  .d-tray,
-  .fd-studio .d-palette,
-  .fd-studio .d-tray {
+  .fd-studio .d-palette {
     --cols: 4;
     width: calc(var(--b) * 4 + 34px);
     grid-auto-rows: calc(var(--b) * 0.8);
@@ -798,4 +798,372 @@ body:has(.game-draw) {
     width: auto;
     height: 80%;
   }
+}
+
+/* ---- picker tabs -------------------------------------------------------------- */
+
+.d-bar-tabs {
+  --tb: min(var(--b), calc((100vw - 24px - 5 * 6px) / 6));
+  gap: 6px;
+}
+
+.d-bar-tabs .d-btn {
+  width: var(--tb);
+  height: var(--tb);
+}
+
+.d-tabs {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.d-tab {
+  border-radius: 20px;
+}
+
+.d-tab.sel {
+  background: #fff3c4;
+  box-shadow: 0 0 0 4px #ffb300, var(--shadow);
+}
+
+@media (orientation: landscape) {
+  .d-bar.d-bar-tabs {
+    position: static;
+  }
+
+  .d-screen .d-bar-tabs ~ .d-fitgrid {
+    margin-left: 0;
+  }
+
+  .d-bar-tabs .d-tabs {
+    margin-right: var(--tb);
+  }
+}
+
+/* ---- dot to dot ------------------------------------------------------------------ */
+
+.dd-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+  touch-action: none;
+}
+
+.dd-dot {
+  fill: #2b2b3a;
+  transition: fill 0.2s;
+}
+
+.dd-dot.on {
+  fill: #43a047;
+}
+
+.dd-num {
+  font: 900 13px var(--font);
+  fill: #2b2b3a;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.dd-num.on {
+  fill: #43a047;
+}
+
+.dd-line {
+  fill: none;
+  stroke: #ff7043;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dd-rubber {
+  stroke: #ff7043;
+  stroke-width: 4;
+  stroke-dasharray: 1 8;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.dd-ring {
+  fill: rgba(255, 201, 40, 0.25);
+  stroke: #ffc928;
+  stroke-width: 4;
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.dd-ring-go {
+  animation: dd-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes dd-pulse {
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+.dd-svg .wiggle {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.dd-art {
+  opacity: 0;
+  transition: opacity 0.9s;
+}
+
+.dd-reveal .dd-art {
+  opacity: 1;
+}
+
+.dd-reveal .dd-dots,
+.dd-reveal .dd-line,
+.dd-reveal .dd-ring {
+  opacity: 0;
+  transition: opacity 0.6s 0.2s;
+}
+
+.dd-side {
+  min-height: calc(var(--b) * 1.3);
+  align-items: center;
+  justify-content: center;
+}
+
+.dd-after {
+  display: flex;
+  gap: 22px;
+  justify-content: center;
+  align-items: center;
+  animation: pop-in 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.dd-after .d-btn {
+  --b: 96px;
+}
+
+.d-go {
+  box-shadow: 0 0 0 5px #66bb6a, var(--shadow);
+}
+
+.dd-go {
+  animation: t-pulse-d 1.2s ease-in-out infinite;
+}
+
+@keyframes t-pulse-d {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.dd-thumb {
+  position: relative;
+}
+
+.dd-thumb .dd-svg {
+  overflow: visible;
+}
+
+.dd-count {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  min-width: 30px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ffd740;
+  font-weight: 900;
+  font-size: 18px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+}
+
+@media (orientation: landscape) {
+  .dd-after {
+    flex-direction: column;
+  }
+
+  .dd-side {
+    width: 130px;
+  }
+}
+
+/* ---- free draw: layers, mirror, stamp tray, scenes --------------------------------- */
+
+.fd-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.fd-mirror-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 4px dashed rgba(255, 128, 171, 0.75);
+  margin-left: -2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.fd-paper.mirroring .fd-mirror-line {
+  opacity: 1;
+}
+
+.d-brush-mirror.on {
+  background: #fce4ec;
+  box-shadow: 0 0 0 4px #ff80ab, var(--shadow);
+}
+
+.d-brush-neon .d-svg {
+  background: #263238;
+  border-radius: 12px;
+}
+
+.fd-stamp-pop.flip > * {
+  transform: scaleX(-1);
+}
+
+/* The crayons and the stamp tray share one spot, so the paper never jumps. */
+.d-swap {
+  position: relative;
+}
+
+.d-palette.d-swapped {
+  visibility: hidden;
+}
+
+.d-tray {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.d-tray-tabs {
+  flex: none;
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+}
+
+.d-tray-tab {
+  flex: 1;
+  height: calc(var(--b) * 0.62);
+  border-radius: 14px;
+  background: #f1f4f9;
+  font-size: calc(var(--b) * 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.d-tray-tab.sel {
+  background: #fff3c4;
+  box-shadow: inset 0 0 0 3px #ffb300;
+}
+
+.d-tray-grid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-auto-rows: calc(var(--b) * 0.8);
+  gap: 2px 4px;
+  scrollbar-width: thin;
+}
+
+.fd-scene-card {
+  padding: 18px;
+}
+
+.fd-scenes {
+  display: grid;
+  grid-template-columns: repeat(3, min(26vw, 150px));
+  gap: 12px;
+}
+
+.fd-scene {
+  aspect-ratio: 1;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 3px solid #e0e0e0;
+}
+
+.fd-scene svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.fd-scene.sel {
+  border-color: #ffb300;
+  box-shadow: 0 0 0 4px #ffb300, var(--shadow);
+}
+
+@media (orientation: landscape) {
+  .d-tray-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: calc(var(--b) * 0.86);
+  }
+
+  .d-tray-tabs {
+    flex-wrap: wrap;
+  }
+
+  .d-tray-tab {
+    flex: 1 0 28%;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .d-tray-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: calc(var(--b) * 0.8);
+  }
+
+  .d-tray-tab {
+    flex: 1;
+    height: calc(var(--b) * 0.55);
+  }
+
+  .d-tray-tabs {
+    flex-wrap: nowrap;
+  }
+
+  .fd-scenes {
+    grid-template-columns: repeat(6, min(13vw, 110px));
+  }
+}
+
+/* A long gallery scrolls instead of shrinking the pictures. */
+.d-fitgrid.d-scroll {
+  align-content: start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  padding: 10px 8px 16px;
 }
