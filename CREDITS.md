@@ -25,3 +25,10 @@ Animal and vehicle sounds come from [Freesound.org](https://freesound.org) and a
 `scripts/sounds/fetch.py`.
 
 Short UI effects (pops, dings, fanfares) are synthesized in code (`src/lib/sfx.ts`).
+
+## Music
+
+The xylophone and drums are synthesized in code (`src/games/music-synth.ts`), so there are no
+music files. The animal piano plays the CC0 animal sounds above at different pitches. Songs
+are traditional, public-domain tunes (Twinkle Twinkle Little Star, Mary Had a Little Lamb,
+Old MacDonald, Row Row Row Your Boat, The Wheels on the Bus, Happy Birthday).
