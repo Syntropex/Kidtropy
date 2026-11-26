@@ -1,12 +1,5 @@
 import { THEMES, type Theme } from "./data/items";
-import { abc } from "./games/abc";
-import { colors } from "./games/colors";
-import { count } from "./games/count";
-import { dig } from "./games/dig";
-import { find } from "./games/find";
-import { race } from "./games/race";
-import { sounds } from "./games/sounds";
-import { talk } from "./games/talk";
+import { GAMES } from "./games/index";
 import type { Game, Scene } from "./games/types";
 import { grade, record, resetLearning, setGrade, starsFor } from "./learn/progress";
 import { lessonById, lessonsFor, skillById, skillsFor, toolById, toolsFor } from "./learn/registry";
@@ -19,7 +12,7 @@ import { progress, resetProgress, saveSettings, settings } from "./lib/store";
 import { line, SAY } from "./voice/lines";
 import { bounce, h, icon, pic, stickerItems, updateStarCount } from "./lib/ui";
 
-export const GAMES: Game[] = [talk, find, count, colors, dig, race, abc, sounds];
+
 
 const app = document.getElementById("app")!;
 let leave: AbortController | null = null;

@@ -6,11 +6,13 @@ Every sound is CC0 (public domain); the script double-checks each license.
 It keeps the loudest few seconds of each recording, evens out the volume,
 and writes public/sounds/<item>.mp3 plus src/voice/sounds.json.
 
-    npm run sounds
+    npm run sounds            # fetch sounds that don't exist yet
+    npm run sounds -- --all   # redo every sound
+    npm run sounds -- cow     # redo just these
 
 To swap a sound: find a CC0 sound on freesound.org, put its number below.
 """
-import json, os, re, subprocess, sys, tempfile, urllib.parse, urllib.request
+import html, json, os, re, subprocess, sys, time, urllib.error, urllib.parse, urllib.request
 
 import numpy as np
 
@@ -67,11 +69,72 @@ SOUNDS = {
     "bulldozer": (379883, 3.0, "tracked machine moving"),
     "crane": (378003, 2.6, "crane machinery"),
     "hammer": (17012, 1.6, "hammering"),
+    # More vehicles
+    "taxi": (434878, 1.0, "car honking"),
+    "pickup": (328224, 2.5, "truck engine starting"),
+    "delivery": (32417, 1.0, "car horn"),
+    "semi": (131930, 2.2, "air horn"),
+    "tow": (370877, 2.0, "chains rattling"),
+    "monster": (127981, 2.1, "big V8 engine rev"),
+    "mixer": (825464, 1.6, "construction machine"),
+    "roller": (379883, 2.5, "tracked machine moving"),
+    "tire": (104026, 2.0, "tires squeaking"),
+    "builder": (566206, 1.8, "power drill"),
+    # Dinosaurs (pretend!)
+    "longneck": (531725, 3.0, "giant footsteps"),
+    "triceratops": (85568, 2.2, "dragon roar"),
+    "stegosaurus": (347410, 2.5, "monster roar"),
+    "pterodactyl": (381200, 2.1, "eagle cry"),
+    # More animals
+    "shark": (467701, 1.6, "big bite"),
+    "crocodile": (411750, 2.0, "alligator growl"),
+    "penguin": (705839, 0.8, "penguin squeak"),
+    "zebra": (850661, 2.5, "zebra braying"),
+    "octopus": (59978, 2.0, "bubbles"),
+    "rabbit": (180158, 2.0, "munching"),
+    "wolf": (203342, 3.0, "wolf howl"),
+    "bird": (511094, 2.6, "bird singing"),
+    "mouse": (188043, 0.9, "mouse squeak"),
+    "dolphin": (456151, 2.6, "dolphin"),
+    "seal": (680735, 2.0, "sea lion bark"),
+    "gorilla": (59834, 0.9, "gorilla"),
+    # Food and things
+    "carrot": (718593, 1.2, "crispy bite"),
+    "apple": (275015, 0.9, "apple bite"),
+    "corn": (652638, 2.5, "popcorn popping"),
+    "egg": (150479, 0.8, "egg cracking"),
+    "trophy": (859076, 3.0, "kids cheering"),
+    "medal": (859076, 3.0, "kids cheering"),
 }
 
 
+CACHE = os.path.expanduser(os.environ.get("KIDTROPY_CACHE", "~/.cache/kidtropy")) + "/freesound"
+
+
 def get(url):
-    return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60).read()
+    # Freesound rate-limits bursts; back off and retry.
+    for attempt in range(6):
+        try:
+            return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60).read()
+        except urllib.error.HTTPError as e:
+            if e.code not in (403, 429) or attempt == 5:
+                raise
+            time.sleep(20 * (attempt + 1))
+
+
+def cached(sid):
+    """Download (once) the preview and license info of a Freesound sound."""
+    os.makedirs(CACHE, exist_ok=True)
+    meta_path, mp3 = os.path.join(CACHE, f"{sid}.json"), os.path.join(CACHE, f"{sid}.mp3")
+    if not (os.path.exists(meta_path) and os.path.exists(mp3)):
+        url, author, title = info(sid)
+        with open(mp3, "wb") as fh:
+            fh.write(get(url))
+        with open(meta_path, "w") as fh:
+            json.dump({"author": author, "title": title}, fh)
+        time.sleep(3)
+    meta = json.load(open(meta_path))
+    return mp3, meta["author"], meta["title"]
 
 
 def info(sid):
@@ -88,7 +151,7 @@ def info(sid):
     author = re.search(r'href="/people/([^/"]+)/"', page)
     title = re.search(r"<title>([^<]*)</title>", page)
     t = title.group(1).replace(" - Freesound", "").strip() if title else str(sid)
-    t = re.sub(r"^Freesound\s*-\s*", "", t)
+    t = html.unescape(re.sub(r"^Freesound\s*-\s*", "", t))
     name = urllib.parse.unquote(author.group(1)) if author else "unknown"
     t = re.sub(r"\s+by\s+" + re.escape(name) + r"\s*$", "", t)
     return prev_url, name, t
@@ -112,21 +175,15 @@ def loudest_window(x, sr, secs):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    only = set(sys.argv[1:])
-    cache = {}
+    only = set(a for a in sys.argv[1:] if not a.startswith("--"))
+    redo = "--all" in sys.argv
     credits = []
-    with tempfile.TemporaryDirectory() as tmp:
+    if True:
         for item, (sid, secs, desc) in SOUNDS.items():
-            if sid not in cache:
-                url, author, title = info(sid)
-                src = os.path.join(tmp, f"{sid}.mp3")
-                with open(src, "wb") as fh:
-                    fh.write(get(url))
-                cache[sid] = (src, author, title)
-            src, author, title = cache[sid]
+            src, author, title = cached(sid)
             credits.append(f"| {item} | [{title}](https://freesound.org/s/{sid}/) by {author} | {desc} |")
             dest = os.path.join(OUT, f"{item}.mp3")
-            if only and item not in only and os.path.exists(dest):
+            if os.path.exists(dest) and not redo and item not in only:
                 continue
             x, sr = decode(src)
             start = loudest_window(x, sr, secs)

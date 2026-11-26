@@ -13,4 +13,6 @@ export interface Game {
   icon: string;
   color: string;
   start(scene: Scene): void | (() => void);
+  /** Every sentence this game can say, for the recorded voice (see src/voice/all-lines.ts). */
+  lines?(): string[];
 }
